@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ & Contact — BiddyFX Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;
+  --glow:rgba(201,168,76,.1);--black:#000;--deep:#030303;
+  --card:#0A0A0A;--border:#1A1A1A;
+  --green:#00C896;--red:#FF4444;--text:#e8e0d0;--muted:#555;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--deep);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:500;background:rgba(0,0,0,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);padding:0 5vw;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gold);text-decoration:none;}
+.logo em{font-style:italic;color:#fff;}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links a{color:#666;text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:8px 10px;transition:color .25s;white-space:nowrap;}
+.nav-links a:hover,.nav-links a.active{color:var(--gold);}
+.nav-btn{background:var(--gold);color:var(--black)!important;padding:9px 18px!important;font-weight:700!important;}
+.nav-btn:hover{background:var(--gold-light)!important;color:var(--black)!important;}
+.nav-toggle{display:none;background:none;border:1px solid var(--border);color:var(--gold);width:40px;height:40px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-mobile{display:none;flex-direction:column;background:#000;border-top:1px solid var(--border);padding:16px 5vw;}
+.nav-mobile a{color:#666;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:13px 0;border-bottom:1px solid var(--border);display:block;}
+.nav-mobile a:hover{color:var(--gold);}
+.nav-mobile.open{display:flex;}
+
+/* PAGE HEADER */
+.page-header{background:#000;border-bottom:1px solid var(--border);padding:60px 5vw 52px;}
+.ph-inner{max-width:1280px;margin:0 auto;}
+.ph-eye{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.ph-line{width:26px;height:1px;background:var(--gold);}
+.ph-txt{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;}
+.ph-title{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,62px);font-weight:900;color:#fff;line-height:1.05;margin-bottom:12px;}
+.ph-title em{font-style:italic;color:var(--gold);font-weight:400;}
+.ph-sub{color:var(--muted);font-size:15px;max-width:500px;line-height:1.65;}
+
+/* SECTIONS */
+.section{padding:80px 5vw;}
+.sec-inner{max-width:1280px;margin:0 auto;}
+.sec-eye{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sec-line{width:26px;height:1px;background:var(--gold);}
+.sec-eyetxt{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,46px);font-weight:900;line-height:1.1;margin-bottom:44px;}
+.sec-title em{font-style:italic;color:var(--gold);font-weight:400;}
+
+/* FAQ */
+.faq-layout{display:grid;grid-template-columns:1fr 400px;gap:52px;align-items:start;}
+.faq-list{}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden;}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;cursor:pointer;transition:all .25s;}
+.faq-q:hover .faq-q-text{color:var(--gold);}
+.faq-q-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#ddd;line-height:1.3;transition:color .25s;}
+.faq-toggle{width:28px;height:28px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:16px;flex-shrink:0;transition:all .3s;background:none;}
+.faq-item.open .faq-toggle{transform:rotate(45deg);background:var(--glow);border-color:var(--gold);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .4s ease;}
+.faq-item.open .faq-a{max-height:500px;}
+.faq-a-inner{padding-bottom:22px;color:#4a4a4a;font-size:14px;line-height:1.8;padding-right:44px;}
+.faq-a-inner strong{color:#777;}
+.faq-a-inner a{color:var(--gold);text-decoration:none;}
+
+/* FAQ CATEGORIES */
+.faq-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;}
+.faq-cat-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .25s;}
+.faq-cat-btn.active,.faq-cat-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--glow);}
+
+/* FAQ SIDEBAR */
+.faq-sidebar{}
+.fs-card{background:var(--card);border:1px solid var(--border);padding:28px;margin-bottom:20px;}
+.fs-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;}
+.fs-text{color:var(--muted);font-size:13px;line-height:1.65;margin-bottom:18px;}
+.fs-btn{display:block;text-align:center;padding:12px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;transition:all .3s;}
+.fs-btn-g{background:var(--gold);color:var(--black);}
+.fs-btn-g:hover{background:var(--gold-light);}
+.fs-btn-o{border:1px solid rgba(201,168,76,.3);color:var(--gold);}
+.fs-btn-o:hover{background:var(--glow);border-color:var(--gold);}
+.fs-contact-list{list-style:none;display:flex;flex-direction:column;gap:14px;}
+.fs-contact-item{display:flex;align-items:flex-start;gap:12px;}
+.fs-contact-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.fs-contact-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
+.fs-contact-val{font-size:13px;color:#888;}
+.fs-contact-val a{color:var(--gold);text-decoration:none;}
+
+/* CONTACT SECTION */
+.contact-bg{background:#000;border-top:1px solid var(--border);}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+.contact-info{}
+.contact-channels{list-style:none;display:flex;flex-direction:column;gap:0;margin-bottom:36px;}
+.channel-item{display:flex;align-items:center;gap:18px;padding:20px 0;border-bottom:1px solid var(--border);transition:all .25s;}
+.channel-item:last-child{border-bottom:none;}
+.channel-icon{width:46px;height:46px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:border-color .25s;}
+.channel-item:hover .channel-icon{border-color:var(--gold);background:var(--glow);}
+.channel-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.channel-val{font-size:14px;color:#888;}
+.channel-val a{color:#888;text-decoration:none;transition:color .25s;}
+.channel-val a:hover{color:var(--gold);}
+.response-note{background:var(--card);border:1px solid var(--border);border-left:2px solid var(--gold);padding:18px 20px;}
+.response-note-text{font-size:13px;color:#444;line-height:1.65;}
+.response-note-text strong{color:var(--gold);}
+
+/* CONTACT FORM */
+.contact-form{background:var(--card);border:1px solid var(--border);padding:36px;}
+.cf-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;}
+.cf-sub{color:var(--muted);font-size:13px;margin-bottom:26px;}
+.cl{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.ci,.cs,.cta{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:12px 13px;outline:none;transition:border-color .3s;appearance:none;margin-bottom:14px;}
+.ci:focus,.cs:focus,.cta:focus{border-color:var(--gold);}
+.cta{resize:vertical;min-height:110px;font-family:'Rajdhani',sans-serif;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.submit-btn{width:100%;background:var(--gold);color:var(--black);padding:15px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;margin-top:4px;}
+.submit-btn:hover{background:var(--gold-light);}
+#formSuccess{display:none;text-align:center;padding:40px 20px;}
+.fs-suc-icon{font-size:40px;margin-bottom:12px;}
+.fs-suc-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.fs-suc-text{color:var(--muted);font-size:13px;line-height:1.7;}
+
+/* CTA STRIP */
+.cta-strip{background:var(--gold);padding:64px 5vw;text-align:center;}
+.cs-inner{max-width:680px;margin:0 auto;}
+.cs-title{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,46px);font-weight:900;color:var(--black);margin-bottom:12px;}
+.cs-title em{font-style:italic;color:rgba(0,0,0,.3);font-weight:400;}
+.cs-sub{color:rgba(0,0,0,.5);font-size:15px;margin-bottom:28px;line-height:1.6;}
+.cs-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cs-btn-b{background:var(--black);color:var(--gold);padding:14px 30px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:all .3s;}
+.cs-btn-b:hover{background:#111;}
+.cs-btn-o{color:var(--black);border:2px solid rgba(0,0,0,.3);padding:14px 30px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:all .3s;}
+.cs-btn-o:hover{border-color:var(--black);}
+
+/* FOOTER */
+footer{background:#000;border-top:1px solid var(--border);padding:44px 5vw;}
+.foot-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.foot-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--gold);}
+.foot-logo em{font-style:italic;color:#1a1a1a;}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap;}
+.foot-links a{color:#2a2a2a;text-decoration:none;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace;transition:color .3s;}
+.foot-links a:hover{color:var(--gold);}
+.foot-copy{font-size:10px;color:#1e1e1e;font-family:'Space Mono',monospace;}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
+.reveal.on{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.12s;}.d2{transition-delay:.22s;}
+
+/* MOBILE */
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .nav-toggle{display:flex;}
+  .faq-layout{grid-template-columns:1fr;}
+  .faq-sidebar{order:-1;}
+  .contact-grid{grid-template-columns:1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .section{padding:56px 5vw;}
+  .faq-a-inner{padding-right:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">Biddy<em>FX</em></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="news.html">Market News</a>
+      <a href="contact.html" class="active">FAQ & Contact</a>
+      <a href="login.html" class="nav-btn">Student Login →</a>
+    </div>
+    <button class="nav-toggle" onclick="toggleNav()" aria-label="Menu">☰</button>
+  </div>
+  <div class="nav-mobile" id="navMobile">
+    <a href="index.html">Home</a>
+    <a href="news.html">Market News</a>
+    <a href="contact.html">FAQ & Contact</a>
+    <a href="login.html" style="color:var(--gold)!important;font-weight:700;">Student Login →</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="ph-inner">
+    <div class="ph-eye"><div class="ph-line"></div><span class="ph-txt">Support</span></div>
+    <h1 class="ph-title">FAQ & <em>Contact Us</em></h1>
+    <p class="ph-sub">Got questions? Find answers below, or reach out to the BiddyFX team directly. We respond fast.</p>
+  </div>
+</div>
+
+<!-- FAQ SECTION -->
+<section class="section" id="faq">
+  <div class="sec-inner">
+    <div class="sec-eye reveal"><div class="sec-line"></div><span class="sec-eyetxt">Frequently Asked</span></div>
+    <h2 class="sec-title reveal">Everything you need <em>to know.</em></h2>
+    <div class="faq-layout">
+      <div>
+        <div class="faq-cats">
+          <button class="faq-cat-btn active" onclick="filterFaq('all',this)">All Questions</button>
+          <button class="faq-cat-btn" onclick="filterFaq('getting-started',this)">Getting Started</button>
+          <button class="faq-cat-btn" onclick="filterFaq('programs',this)">Programs</button>
+          <button class="faq-cat-btn" onclick="filterFaq('trading',this)">Trading</button>
+          <button class="faq-cat-btn" onclick="filterFaq('payments',this)">Payments</button>
+        </div>
+        <div class="faq-list" id="faqList">
+
+          <!-- GETTING STARTED -->
+          <div class="faq-item" data-cat="getting-started">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Do I need any prior trading experience to join?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Absolutely not. The Foundation program is designed specifically for complete beginners — we start from scratch. If you know nothing about forex, candlestick charts, or financial markets, that's exactly who BiddyFX Foundation is built for. We take you from zero to confident, step by step.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="getting-started">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">How quickly can I get access after signing up?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Instant. Create a free account on our <a href="login.html">student portal</a> and you're in immediately. The Foundation course and all student tools — including the position calculator, session clock, and community access — are available the moment your account is created. No waiting, no approval process.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="getting-started">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">What equipment do I need to start?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Just a smartphone or laptop and an internet connection. We recommend completing the course on a desktop or laptop for the best experience. For live trading practice, we recommend MetaTrader 4 (MT4) — it's free to download and works on both desktop and mobile. Your broker will provide you with a demo account.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="getting-started">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Is there a mobile app for the student dashboard?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Our student portal is fully mobile-responsive and works beautifully on any device through your mobile browser. Simply visit <strong>biddyfx.com/login</strong> on your phone's browser, save it to your home screen, and it functions just like an app. Native iOS/Android apps are on our roadmap.</div></div>
+          </div>
+
+          <!-- PROGRAMS -->
+          <div class="faq-item" data-cat="programs">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">What's included in the free Foundation program?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">The Foundation includes 18 full lessons across 4 modules: Forex Fundamentals (how the market works, currency pairs, candlestick charts, lots and leverage), Support & Resistance basics, an introduction to Breakout Trading, and Trendline fundamentals. You also get access to the student dashboard, position size calculator, trading session clock, and our private community Discord.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="programs">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">What does Pro Trader unlock?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Pro Trader is the full BiddyFX system. It includes everything in Foundation plus: advanced breakout trading with fakeout filters, complete trendline mastery, weekly live trading sessions where you watch and trade alongside our analyst in real time, London and NY signal alerts, a 1-on-1 strategy call, and access to our private Pro mentorship group on WhatsApp/Telegram.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="programs">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">What is the Apex / Funded Trader program?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Apex is for traders who want to pass prop firm challenges and trade with funded accounts (FTMO, MyForexFunds, The Funded Trader, etc.). You get everything in Pro Trader plus: a personalized trading plan built around your specific prop firm's rules, monthly 1-on-1 coaching sessions, and access to our exclusive Apex mastermind group. Contact us to apply — spots are limited.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="programs">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Can I upgrade from Foundation to Pro later?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Yes, absolutely. Start free with Foundation — there's no time limit. When you're ready to level up (or when your demo account results prove you're ready for the full system), reach out to us via WhatsApp or the contact form below and we'll get you set up within 24 hours. Your existing progress is saved and carries over.</div></div>
+          </div>
+
+          <!-- TRADING -->
+          <div class="faq-item" data-cat="trading">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">How much money do I need to start live trading?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">We strongly recommend starting on a demo account and spending at least 30–60 days there before touching real money. When you do go live, you can start with as little as $100–$500 using micro lots. However, to trade meaningfully with proper risk management (1% risk per trade), we recommend a minimum of $500–$1,000. Never trade money you cannot afford to lose.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="trading">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Which broker do you recommend?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">We don't officially endorse any specific broker, but we advise choosing one that is: regulated by a reputable authority (FCA, ASIC, CySEC), offers MT4/MT5, has tight spreads on the pairs you want to trade, and has solid customer support. For Nigerian traders, popular choices include Exness, HFM, and IC Markets. Always verify regulation before depositing funds.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="trading">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Do you provide trading signals?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Pro Trader and Apex members receive trade setup alerts during the London and New York sessions. However, our primary focus is teaching you to find your own setups — <strong>signals alone don't make consistent traders; understanding makes consistent traders.</strong> We provide signals as a learning supplement, not a substitute for developing your own skills.</div></div>
+          </div>
+
+          <!-- PAYMENTS -->
+          <div class="faq-item" data-cat="payments">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">How do I pay for Pro or Apex programs?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">After you apply or express interest through the contact form or WhatsApp, we'll send you payment details. We accept bank transfer (Nigerian banks), USDT/crypto, and PayPal where available. Once payment is confirmed, your access is upgraded within 24 hours. Contact us via WhatsApp for the fastest response.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="payments">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Is there a refund policy?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">We offer a 7-day satisfaction guarantee for Pro Trader. If you've completed less than 30% of the Pro content and are genuinely unsatisfied within 7 days of purchase, contact us and we'll process your refund. Apex program refunds are handled case-by-case given the personalized nature of the program. Foundation is completely free, so no refund applies.</div></div>
+          </div>
+
+          <div class="faq-item" data-cat="payments">
+            <div class="faq-q" onclick="toggleFaq(this)">
+              <span class="faq-q-text">Are there payment plans available?</span>
+              <button class="faq-toggle">+</button>
+            </div>
+            <div class="faq-a"><div class="faq-a-inner">Yes. We want access to be achievable for serious students regardless of financial situation. Flexible installment plans are available for both Pro Trader and Apex — typically 2–3 monthly payments. Contact us via WhatsApp to discuss options. We assess each case individually and find something that works.</div></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FAQ SIDEBAR -->
+      <div class="faq-sidebar reveal">
+        <div class="fs-card">
+          <div class="fs-title">Still have questions?</div>
+          <p class="fs-text">Our team typically responds within 2 hours during business hours. Reach out on WhatsApp for the fastest response.</p>
+          <a href="#contact" class="fs-btn fs-btn-g" style="margin-bottom:10px;">Message Us →</a>
+          <a href="login.html" class="fs-btn fs-btn-o">Create Free Account</a>
+        </div>
+        <div class="fs-card">
+          <div class="sw-title" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);">Direct Contact</div>
+          <ul class="fs-contact-list">
+            <li class="fs-contact-item">
+              <span class="fs-contact-icon">📱</span>
+              <div><div class="fs-contact-label">WhatsApp</div><div class="fs-contact-val"><a href="https://wa.me/2348000000000">+234 800 000 0000</a></div></div>
+            </li>
+            <li class="fs-contact-item">
+              <span class="fs-contact-icon">📧</span>
+              <div><div class="fs-contact-label">Email</div><div class="fs-contact-val"><a href="mailto:hello@biddyfx.com">hello@biddyfx.com</a></div></div>
+            </li>
+            <li class="fs-contact-item">
+              <span class="fs-contact-icon">📸</span>
+              <div><div class="fs-contact-label">Instagram</div><div class="fs-contact-val"><a href="#">@biddyfxacademy</a></div></div>
+            </li>
+            <li class="fs-contact-item">
+              <span class="fs-contact-icon">🐦</span>
+              <div><div class="fs-contact-label">Twitter / X</div><div class="fs-contact-val"><a href="#">@biddyfx</a></div></div>
+            </li>
+          </ul>
+        </div>
+        <div class="fs-card" style="background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02));border-color:rgba(201,168,76,.2);">
+          <div style="font-size:28px;margin-bottom:10px;">🎓</div>
+          <div class="fs-title" style="font-size:17px;">Start Free Today</div>
+          <p class="fs-text">No credit card. No catch. 18 full lessons waiting for you right now.</p>
+          <a href="login.html" class="fs-btn fs-btn-g">Get Started →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="section contact-bg" id="contact">
+  <div class="sec-inner">
+    <div class="sec-eye reveal"><div class="sec-line"></div><span class="sec-eyetxt">Get In Touch</span></div>
+    <h2 class="sec-title reveal">Send us a <em>message.</em></h2>
+    <div class="contact-grid">
+      <div class="reveal">
+        <ul class="contact-channels">
+          <li class="channel-item">
+            <div class="channel-icon">📱</div>
+            <div>
+              <div class="channel-label">WhatsApp (Fastest)</div>
+              <div class="channel-val"><a href="https://wa.me/2348000000000">+234 800 000 0000</a> — typically replies in &lt;2 hrs</div>
+            </div>
+          </li>
+          <li class="channel-item">
+            <div class="channel-icon">📧</div>
+            <div>
+              <div class="channel-label">Email</div>
+              <div class="channel-val"><a href="mailto:hello@biddyfx.com">hello@biddyfx.com</a> — replies within 24 hrs</div>
+            </div>
+          </li>
+          <li class="channel-item">
+            <div class="channel-icon">📸</div>
+            <div>
+              <div class="channel-label">Instagram</div>
+              <div class="channel-val"><a href="#">@biddyfxacademy</a> — DMs welcome</div>
+            </div>
+          </li>
+          <li class="channel-item">
+            <div class="channel-icon">💬</div>
+            <div>
+              <div class="channel-label">Community Discord</div>
+              <div class="channel-val">Available to all registered students — <a href="login.html">create account to join</a></div>
+            </div>
+          </li>
+        </ul>
+        <div class="response-note">
+          <p class="response-note-text"><strong>Business hours:</strong> Monday – Friday, 8:00 AM – 8:00 PM WAT (GMT+1). We monitor WhatsApp outside of these hours for urgent matters. Market-related questions get priority during active London and NY sessions.</p>
+        </div>
+      </div>
+
+      <div class="contact-form reveal d1">
+        <div id="contactFormContent">
+          <div class="cf-title">Send a Message</div>
+          <div class="cf-sub">We'll get back to you within 24 hours</div>
+          <div class="two-col">
+            <div><label class="cl">First Name *</label><input type="text" class="ci" id="cfFirst" placeholder="John"></div>
+            <div><label class="cl">Last Name *</label><input type="text" class="ci" id="cfLast" placeholder="Doe"></div>
+          </div>
+          <label class="cl">Email Address *</label>
+          <input type="email" class="ci" id="cfEmail" placeholder="your@email.com">
+          <label class="cl">Phone / WhatsApp</label>
+          <input type="text" class="ci" id="cfPhone" placeholder="+234 800 000 0000">
+          <label class="cl">Subject *</label>
+          <select class="cs" id="cfSubject">
+            <option value="">What is your enquiry about?</option>
+            <option>Foundation Program — Free Access</option>
+            <option>Pro Trader Program — Enrollment</option>
+            <option>Apex / Funded Trader Program</option>
+            <option>Payment / Pricing</option>
+            <option>Technical Support</option>
+            <option>General Question</option>
+          </select>
+          <label class="cl">Message *</label>
+          <textarea class="cta" id="cfMsg" placeholder="Tell us what you need..."></textarea>
+          <button class="submit-btn" onclick="submitContact()">Send Message →</button>
+          <div style="font-size:11px;color:#252525;margin-top:12px;font-family:'Space Mono',monospace;">🔒 Your info is safe. We never share your details.</div>
+        </div>
+        <div id="formSuccess">
+          <div class="fs-suc-icon">✉️</div>
+          <div class="fs-suc-title">Message Sent!</div>
+          <p class="fs-suc-text">Thank you for reaching out. We'll reply to your email within 24 hours. For urgent enquiries, reach us directly on WhatsApp.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<div class="cta-strip">
+  <div class="cs-inner">
+    <div class="cs-title">Ready to start <em>trading?</em></div>
+    <p class="cs-sub">Join thousands of traders learning the BiddyFX way. Foundation course is completely free — start in 60 seconds.</p>
+    <div class="cs-btns">
+      <a href="login.html" class="cs-btn-b">Start Free Now →</a>
+      <a href="index.html#programs" class="cs-btn-o">View Programs</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-logo">Biddy<em>FX</em> Academy</div>
+    <div class="foot-links">
+      <a href="index.html">Home</a><a href="news.html">Market News</a>
+      <a href="contact.html">FAQ & Contact</a><a href="login.html">Student Login</a>
+    </div>
+    <div class="foot-copy">© 2025 BiddyFX Academy · Not financial advice</div>
+  </div>
+</footer>
+
+<script>
+function toggleNav(){document.getElementById('navMobile').classList.toggle('open');}
+
+// REVEAL
+document.querySelectorAll('.reveal').forEach(el=>{
+  new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('on');});},{threshold:.07}).observe(el);
+});
+
+// FAQ
+function toggleFaq(q){
+  const item=q.closest('.faq-item');
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen)item.classList.add('open');
+}
+
+function filterFaq(cat,btn){
+  document.querySelectorAll('.faq-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.faq-item').forEach(item=>{
+    item.style.display=(cat==='all'||item.dataset.cat===cat)?'block':'none';
+  });
+}
+
+// CONTACT FORM
+function submitContact(){
+  const first=document.getElementById('cfFirst').value.trim();
+  const email=document.getElementById('cfEmail').value.trim();
+  const subject=document.getElementById('cfSubject').value;
+  const msg=document.getElementById('cfMsg').value.trim();
+  if(!first||!email||!subject||!msg){alert('Please fill in all required fields.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email.');return;}
+  document.getElementById('contactFormContent').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+}
+</script>
+</body>
+</html>

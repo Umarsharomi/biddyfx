@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Login — BiddyFX Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;
+  --glow:rgba(201,168,76,.1);--black:#000;--deep:#030303;
+  --card:#0A0A0A;--border:#1A1A1A;--border2:#252525;
+  --green:#00C896;--red:#FF4444;--text:#e8e0d0;--muted:#555;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{background:var(--deep);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+
+/* NAV */
+nav{background:rgba(0,0,0,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);padding:0 5vw;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gold);text-decoration:none;}
+.logo em{font-style:italic;color:#fff;}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links a{color:#666;text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:8px 10px;transition:color .25s;white-space:nowrap;}
+.nav-links a:hover{color:var(--gold);}
+.nav-btn{background:var(--gold);color:var(--black)!important;padding:9px 18px!important;font-weight:700!important;}
+.nav-toggle{display:none;background:none;border:1px solid var(--border);color:var(--gold);width:40px;height:40px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-mobile{display:none;flex-direction:column;background:#000;border-top:1px solid var(--border);padding:16px 5vw;}
+.nav-mobile a{color:#666;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:13px 0;border-bottom:1px solid var(--border);display:block;}
+.nav-mobile a:hover{color:var(--gold);}
+.nav-mobile.open{display:flex;}
+
+/* PAGE */
+.login-page{min-height:calc(100vh - 60px);display:grid;grid-template-columns:1fr 1fr;}
+
+/* LEFT PANEL */
+.login-left{background:#000;border-right:1px solid var(--border);padding:60px 5vw;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+.ll-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.025) 1px,transparent 1px);background-size:52px 52px;}
+.ll-glow{position:absolute;top:30%;left:20%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(201,168,76,.06) 0%,transparent 70%);pointer-events:none;}
+.ll-inner{position:relative;z-index:2;max-width:440px;}
+.ll-eye{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.ll-line{width:26px;height:1px;background:var(--gold);}
+.ll-eyetxt{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;}
+.ll-title{font-family:'Playfair Display',serif;font-size:clamp(34px,3.5vw,52px);font-weight:900;line-height:1.05;color:#fff;margin-bottom:18px;}
+.ll-title em{font-style:italic;color:var(--gold);font-weight:400;}
+.ll-sub{color:#3a3a3a;font-size:15px;line-height:1.7;margin-bottom:36px;}
+.ll-perks{list-style:none;display:flex;flex-direction:column;gap:13px;}
+.ll-perk{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:#3a3a3a;}
+.ll-perk-icon{width:22px;height:22px;border-radius:50%;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;}
+.ll-perk-text{line-height:1.5;}
+.ll-perk-text strong{color:#666;font-weight:700;}
+.ll-chart{position:absolute;bottom:-20px;right:-20px;width:55%;opacity:.06;pointer-events:none;}
+
+/* RIGHT PANEL */
+.login-right{background:var(--deep);display:flex;align-items:center;justify-content:center;padding:40px 5vw;}
+.auth-box{width:100%;max-width:440px;}
+.auth-brand{text-align:center;margin-bottom:32px;}
+.auth-brand-logo{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--gold);}
+.auth-brand-logo em{font-style:italic;color:#fff;}
+.auth-brand-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:4px;}
+.auth-card{background:var(--card);border:1px solid var(--border);}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);}
+.auth-tab{flex:1;padding:16px;background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .3s;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.auth-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.auth-body{padding:32px 28px;}
+.auth-form{display:none;}
+.auth-form.active{display:block;}
+.al{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.ai,.as{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:13px 14px;outline:none;transition:border-color .3s;appearance:none;margin-bottom:14px;}
+.ai:focus,.as:focus{border-color:var(--gold);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.auth-btn{width:100%;background:var(--gold);color:var(--black);padding:15px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;margin-top:4px;}
+.auth-btn:hover{background:var(--gold-light);}
+.auth-err{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;margin-top:10px;min-height:18px;}
+.auth-note{font-size:12px;color:var(--muted);margin-top:14px;text-align:center;line-height:1.6;font-family:'Space Mono',monospace;}
+.auth-note a{color:var(--gold);}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.auth-divider-line{flex:1;height:1px;background:var(--border);}
+.auth-divider-text{font-family:'Space Mono',monospace;font-size:9px;color:var(--border2);letter-spacing:.12em;text-transform:uppercase;}
+.forgot-link{display:block;text-align:right;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;margin-top:-8px;margin-bottom:16px;transition:color .25s;}
+.forgot-link:hover{color:var(--gold);}
+
+/* FIELD GROUP */
+.fg{margin-bottom:0;}
+
+/* SUCCESS STATE */
+#loginSuccess,#regSuccess{display:none;text-align:center;padding:40px 20px;}
+.suc-icon{font-size:44px;margin-bottom:14px;}
+.suc-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.suc-text{color:var(--muted);font-size:14px;margin-bottom:22px;line-height:1.7;}
+.suc-btn{display:inline-block;background:var(--gold);color:var(--black);padding:14px 28px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:all .3s;}
+.suc-btn:hover{background:var(--gold-light);}
+
+/* FOOTER */
+footer{background:#000;border-top:1px solid var(--border);padding:30px 5vw;}
+.foot-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.foot-logo{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--gold);}
+.foot-logo em{font-style:italic;color:#1a1a1a;}
+.foot-links{display:flex;gap:18px;flex-wrap:wrap;}
+.foot-links a{color:#222;text-decoration:none;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace;transition:color .3s;}
+.foot-links a:hover{color:var(--gold);}
+.foot-copy{font-size:10px;color:#1a1a1a;font-family:'Space Mono',monospace;}
+
+/* MOBILE */
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .nav-toggle{display:flex;}
+  .login-page{grid-template-columns:1fr;}
+  .login-left{display:none;}
+  .auth-body{padding:24px 20px;}
+  .two-col{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">Biddy<em>FX</em></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="news.html">Market News</a>
+      <a href="contact.html">FAQ & Contact</a>
+      <a href="login.html" style="color:var(--gold);">Student Portal</a>
+    </div>
+    <button class="nav-toggle" onclick="toggleNav()" aria-label="Menu">☰</button>
+  </div>
+  <div class="nav-mobile" id="navMobile">
+    <a href="index.html">Home</a>
+    <a href="news.html">Market News</a>
+    <a href="contact.html">FAQ & Contact</a>
+    <a href="login.html" style="color:var(--gold)!important;font-weight:700;">Student Portal</a>
+  </div>
+</nav>
+
+<div class="login-page">
+
+  <!-- LEFT: MARKETING PANEL -->
+  <div class="login-left">
+    <div class="ll-grid"></div>
+    <div class="ll-glow"></div>
+    <div class="ll-inner">
+      <div class="ll-eye"><div class="ll-line"></div><span class="ll-eyetxt">Student Portal</span></div>
+      <h2 class="ll-title">Your Trading<br><em>Journey Starts</em><br>Here.</h2>
+      <p class="ll-sub">Free Foundation access is instant. No credit card. No catch. Start learning in under 60 seconds.</p>
+      <ul class="ll-perks">
+        <li class="ll-perk"><div class="ll-perk-icon">📚</div><div class="ll-perk-text"><strong>18 Free Lessons</strong> across 4 modules — Forex Fundamentals, S&R, Breakout, Trendlines</div></li>
+        <li class="ll-perk"><div class="ll-perk-icon">📊</div><div class="ll-perk-text"><strong>Progress Tracking</strong> — know exactly where you are and what's next</div></li>
+        <li class="ll-perk"><div class="ll-perk-icon">🧮</div><div class="ll-perk-text"><strong>Member Tools</strong> — position calculator and live sessions clock</div></li>
+        <li class="ll-perk"><div class="ll-perk-icon">💬</div><div class="ll-perk-text"><strong>Community Access</strong> — join our private Discord on signup</div></li>
+        <li class="ll-perk"><div class="ll-perk-icon">🔓</div><div class="ll-perk-text"><strong>Upgrade Anytime</strong> — unlock Pro & Apex when you're ready</div></li>
+      </ul>
+    </div>
+    <!-- Decorative chart SVG -->
+    <svg class="ll-chart" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="0,160 60,140 120,110 180,125 240,70 300,48 360,28 400,14" fill="none" stroke="#C9A84C" stroke-width="2.5"/>
+      <polygon points="0,160 60,140 120,110 180,125 240,70 300,48 360,28 400,14 400,200 0,200" fill="#C9A84C" opacity=".15"/>
+    </svg>
+  </div>
+
+  <!-- RIGHT: AUTH FORM -->
+  <div class="login-right">
+    <div class="auth-box">
+      <div class="auth-brand">
+        <div class="auth-brand-logo">Biddy<em>FX</em></div>
+        <div class="auth-brand-sub">Academy Portal</div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+          <button class="auth-tab" onclick="switchTab('register')">Create Account</button>
+        </div>
+        <div class="auth-body">
+
+          <!-- LOGIN FORM -->
+          <div class="auth-form active" id="loginForm">
+            <div class="fg"><label class="al">Email Address</label><input type="email" class="ai" id="loginEmail" placeholder="your@email.com"></div>
+            <div class="fg"><label class="al">Password</label><input type="password" class="ai" id="loginPass" placeholder="Your password"></div>
+            <a href="#" class="forgot-link" onclick="forgotPass(event)">Forgot password?</a>
+            <button class="auth-btn" onclick="handleLogin()">Sign In to Dashboard →</button>
+            <div class="auth-err" id="loginErr"></div>
+            <div class="auth-note">Don't have an account? <a href="#" onclick="switchTab('register');return false;">Register free →</a><br><br><a href="index.html">← Back to homepage</a></div>
+          </div>
+
+          <!-- LOGIN SUCCESS -->
+          <div id="loginSuccess">
+            <div class="suc-icon">🎉</div>
+            <div class="suc-title">Welcome back!</div>
+            <p class="suc-text">You're signed in. Head to your dashboard to continue learning and access your tools.</p>
+            <a href="dashboard.html" class="suc-btn">Go to Dashboard →</a>
+          </div>
+
+          <!-- REGISTER FORM -->
+          <div class="auth-form" id="registerForm">
+            <div class="two-col">
+              <div class="fg"><label class="al">First Name</label><input type="text" class="ai" id="regFirst" placeholder="John"></div>
+              <div class="fg"><label class="al">Last Name</label><input type="text" class="ai" id="regLast" placeholder="Doe"></div>
+            </div>
+            <div class="fg"><label class="al">Email Address</label><input type="email" class="ai" id="regEmail" placeholder="your@email.com"></div>
+            <div class="fg"><label class="al">WhatsApp / Phone</label><input type="text" class="ai" id="regPhone" placeholder="+234 800 000 0000"></div>
+            <div class="fg"><label class="al">Password (min. 8 chars)</label><input type="password" class="ai" id="regPass" placeholder="Choose a password"></div>
+            <div class="fg"><label class="al">Trading Experience</label>
+              <select class="as" id="regExp">
+                <option value="">Select your level</option>
+                <option>Complete beginner</option>
+                <option>Less than 6 months</option>
+                <option>6 months – 1 year</option>
+                <option>1–3 years</option>
+                <option>3+ years</option>
+              </select>
+            </div>
+            <div class="fg"><label class="al">Program Interest</label>
+              <select class="as" id="regProg">
+                <option value="">Select a program</option>
+                <option>Foundation (Free)</option>
+                <option>Pro Trader</option>
+                <option>Apex / Funded</option>
+              </select>
+            </div>
+            <button class="auth-btn" onclick="handleRegister()">Create Free Account →</button>
+            <div class="auth-err" id="regErr"></div>
+            <div class="auth-note">Free Foundation access is instant. No credit card needed.<br>By registering you agree to our Terms & Privacy Policy.</div>
+          </div>
+
+          <!-- REGISTER SUCCESS -->
+          <div id="regSuccess">
+            <div class="suc-icon">🚀</div>
+            <div class="suc-title">Account Created!</div>
+            <p class="suc-text">Welcome to BiddyFX Academy. Your free Foundation course is ready. Let's go!</p>
+            <a href="dashboard.html" class="suc-btn">Enter Dashboard →</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-logo">Biddy<em>FX</em></div>
+    <div class="foot-links">
+      <a href="index.html">Home</a><a href="news.html">Market News</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="foot-copy">© 2025 BiddyFX Academy · Not financial advice</div>
+  </div>
+</footer>
+
+<script>
+function toggleNav(){document.getElementById('navMobile').classList.toggle('open');}
+
+function switchTab(t){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+  document.querySelectorAll('.auth-tab')[t==='login'?0:1].classList.add('active');
+  document.getElementById(t+'Form').classList.add('active');
+  document.getElementById('loginSuccess').style.display='none';
+  document.getElementById('regSuccess').style.display='none';
+}
+
+function handleLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginErr');
+  if(!email||!pass){err.textContent='Please fill in both fields.';return;}
+  const stored=localStorage.getItem('bfx_user');
+  if(!stored){err.textContent='No account found. Please create one.';return;}
+  const u=JSON.parse(stored);
+  if(u.email!==email){err.textContent='Email not found.';return;}
+  if(u.password!==btoa(pass)){err.textContent='Incorrect password.';return;}
+  err.textContent='';
+  u.lastLogin=new Date().toISOString();
+  localStorage.setItem('bfx_user',JSON.stringify(u));
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('loginSuccess').style.display='block';
+}
+
+function handleRegister(){
+  const first=document.getElementById('regFirst').value.trim();
+  const last=document.getElementById('regLast').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  const pass=document.getElementById('regPass').value;
+  const exp=document.getElementById('regExp').value;
+  const prog=document.getElementById('regProg').value;
+  const err=document.getElementById('regErr');
+  if(!first||!email||!pass||!exp){err.textContent='Please fill in all required fields.';return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err.textContent='Please enter a valid email.';return;}
+  if(pass.length<8){err.textContent='Password must be at least 8 characters.';return;}
+  err.textContent='';
+  const user={name:first+' '+last,firstName:first,lastName:last,email,phone,password:btoa(pass),exp,prog:prog||'Foundation (Free)',joined:new Date().toISOString(),lastLogin:new Date().toISOString(),progress:{},streak:1,activities:[]};
+  localStorage.setItem('bfx_user',JSON.stringify(user));
+  document.getElementById('registerForm').style.display='none';
+  document.getElementById('regSuccess').style.display='block';
+}
+
+function forgotPass(e){
+  e.preventDefault();
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!email){alert('Please enter your email address first.');return;}
+  alert('Password reset link sent to: '+email+'\n\n(In production this would send a real reset email.)');
+}
+</script>
+</body>
+</html>

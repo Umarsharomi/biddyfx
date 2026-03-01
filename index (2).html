@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiddyFX Academy — Master the Markets</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;
+  --glow:rgba(201,168,76,.1);--black:#000;--deep:#030303;
+  --card:#0A0A0A;--border:#1A1A1A;--border2:#252525;
+  --green:#00C896;--red:#FF4444;--text:#e8e0d0;--muted:#555;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--deep);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+
+/* NAV */
+.ticker-wrap{height:40px;background:#000;border-bottom:1px solid var(--border);overflow:hidden;}
+nav{position:sticky;top:0;z-index:500;background:rgba(0,0,0,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);padding:0 5vw;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gold);text-decoration:none;white-space:nowrap;}
+.logo em{font-style:italic;color:#fff;}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links a{color:#666;text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:8px 10px;transition:color .25s;white-space:nowrap;}
+.nav-links a:hover,.nav-links a.active{color:var(--gold);}
+.nav-btn{background:var(--gold);color:var(--black)!important;padding:9px 18px!important;font-weight:700!important;letter-spacing:.16em!important;}
+.nav-btn:hover{background:var(--gold-light)!important;color:var(--black)!important;}
+.nav-toggle{display:none;background:none;border:1px solid var(--border);color:var(--gold);width:40px;height:40px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-mobile{display:none;flex-direction:column;background:#000;border-top:1px solid var(--border);padding:16px 5vw;}
+.nav-mobile a{color:#666;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:13px 0;border-bottom:1px solid var(--border);display:block;transition:color .25s;}
+.nav-mobile a:hover{color:var(--gold);}
+.nav-mobile.open{display:flex;}
+
+/* HERO */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;position:relative;padding:80px 5vw 120px;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 65% 50%,rgba(201,168,76,.06) 0%,transparent 65%),#000;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.03) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 70% 80% at 60% 50%,#000,transparent 72%);}
+.hero-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2;max-width:1280px;margin:0 auto;width:100%;}
+.hero-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+.eyeline{width:32px;height:1px;background:var(--gold);}
+.eyetext{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.24em;text-transform:uppercase;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(44px,5.5vw,82px);line-height:.98;font-weight:900;margin-bottom:22px;}
+h1 .gold{color:var(--gold);}
+h1 .ital{font-style:italic;font-weight:400;}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.badge{background:var(--glow);border:1px solid rgba(201,168,76,.2);color:var(--gold);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;padding:5px 11px;text-transform:uppercase;}
+.hero-sub{font-size:16px;color:#666;line-height:1.75;max-width:440px;margin-bottom:36px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-gold{background:var(--gold);color:var(--black);padding:15px 32px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;display:inline-block;transition:all .3s;}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px);}
+.btn-out{color:var(--gold);padding:15px 24px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;border:1px solid rgba(201,168,76,.3);transition:all .3s;}
+.btn-out:hover{border-color:var(--gold);background:var(--glow);}
+.hero-chart{position:relative;width:100%;}
+.hero-chart svg{width:100%;height:auto;display:block;}
+
+/* STATS BAR */
+.stats-bar{background:#000;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 5vw;}
+.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);max-width:1280px;margin:0 auto;}
+.stat{padding:0 24px;border-right:1px solid var(--border);text-align:center;}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);}
+.stat-l{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:4px;}
+
+/* SECTIONS */
+.section{padding:90px 5vw;}
+.sec-inner{max-width:1280px;margin:0 auto;}
+.sec-eye{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sec-eye-line{width:26px;height:1px;background:var(--gold);}
+.sec-eye-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(30px,3.8vw,50px);font-weight:900;line-height:1.08;margin-bottom:52px;}
+.sec-title em{font-style:italic;color:var(--gold);font-weight:400;}
+
+/* STRATEGY */
+.strat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.strat-card{background:var(--card);border:1px solid var(--border);padding:38px 32px;position:relative;overflow:hidden;transition:all .35s;}
+.strat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform .4s;}
+.strat-card:hover{border-color:rgba(201,168,76,.3);transform:translateY(-4px);}
+.strat-card:hover::after{transform:scaleX(1);}
+.strat-icon{font-size:30px;margin-bottom:18px;}
+.strat-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:11px;color:#fff;}
+.strat-desc{color:#4a4a4a;font-size:14px;line-height:1.75;margin-bottom:18px;}
+.strat-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.stag{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12);color:#666;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.08em;padding:4px 9px;text-transform:uppercase;}
+
+/* CALCULATOR */
+.calc-bg{background:#000;}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+.calc-box{background:var(--card);border:1px solid var(--border);padding:36px;}
+.calc-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;}
+.calc-sub{color:var(--muted);font-size:13px;margin-bottom:26px;}
+.cl{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.ci,.cs{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:12px 13px;outline:none;transition:border-color .3s;appearance:none;margin-bottom:14px;}
+.ci:focus,.cs:focus{border-color:var(--gold);}
+.cbtn{width:100%;background:var(--gold);color:var(--black);padding:14px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;}
+.cbtn:hover{background:var(--gold-light);}
+.calc-results{background:var(--card);border:1px solid var(--border);padding:36px;}
+.cr-hd{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.cr-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(26,26,26,.8);}
+.cr-label{color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;}
+.cr-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);}
+.cr-val.g{color:var(--green);}.cr-val.r{color:var(--red);}
+.risk-meter{margin-top:18px;}
+.rm-labels{display:flex;justify-content:space-between;margin-bottom:6px;}
+.rm-labels span{font-family:'Space Mono',monospace;font-size:8px;color:var(--border2);}
+.rm-track{height:4px;background:#111;}
+.rm-fill{height:100%;background:var(--green);transition:width .6s ease,background .3s;}
+.calc-note{margin-top:16px;padding:12px 14px;background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.08);font-size:11px;color:#333;line-height:1.6;font-family:'Space Mono',monospace;}
+
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.testi-card{background:var(--card);border:1px solid var(--border);padding:32px;position:relative;}
+.testi-card::before{content:'"';position:absolute;top:18px;right:22px;font-family:'Playfair Display',serif;font-size:68px;color:rgba(201,168,76,.06);line-height:1;}
+.testi-stars{color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:14px;}
+.testi-text{color:#4a4a4a;font-size:14px;line-height:1.75;margin-bottom:22px;}
+.testi-author{display:flex;align-items:center;gap:11px;}
+.testi-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--black);font-size:13px;flex-shrink:0;}
+.testi-name{font-weight:700;font-size:13px;color:#bbb;}
+.testi-meta{font-size:10px;color:#333;font-family:'Space Mono',monospace;}
+
+/* PROGRAMS */
+.prog-bg{background:#000;}
+.prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.prog-card{background:var(--card);border:1px solid var(--border);padding:38px 32px;position:relative;overflow:hidden;transition:all .35s;}
+.prog-card.hot{background:linear-gradient(150deg,#0e0c07,#070600);border-color:var(--gold-dark);}
+.prog-card.hot::after{content:'MOST POPULAR';position:absolute;top:20px;right:-32px;background:var(--gold);color:var(--black);font-family:'Space Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.12em;padding:5px 46px;transform:rotate(45deg);}
+.prog-card:hover{transform:translateY(-4px);border-color:rgba(201,168,76,.35);}
+.prog-badge{display:inline-block;background:var(--glow);border:1px solid rgba(201,168,76,.18);color:var(--gold);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;margin-bottom:22px;}
+.prog-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;margin-bottom:6px;color:#fff;}
+.prog-tag{color:#3a3a3a;font-size:13px;margin-bottom:26px;}
+.prog-feats{list-style:none;margin-bottom:32px;}
+.prog-feats li{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:#555;display:flex;align-items:center;gap:8px;}
+.prog-feats li::before{content:'◆';color:var(--gold);font-size:6px;flex-shrink:0;}
+.prog-feats li:last-child{border-bottom:none;}
+.prog-btn{display:block;text-align:center;text-decoration:none;padding:14px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;transition:all .3s;}
+.prog-btn-o{border:1px solid rgba(201,168,76,.28);color:var(--gold);}
+.prog-btn-o:hover{background:var(--glow);border-color:var(--gold);}
+.prog-btn-s{background:var(--gold);color:var(--black);}
+.prog-btn-s:hover{background:var(--gold-light);}
+.prog-free-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.22);color:var(--green);font-family:'Space Mono',monospace;font-size:8px;padding:4px 9px;text-transform:uppercase;margin-bottom:16px;}
+
+/* FOOTER */
+footer{background:#000;border-top:1px solid var(--border);padding:44px 5vw;}
+.foot-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.foot-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--gold);}
+.foot-logo em{font-style:italic;color:#1a1a1a;}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap;}
+.foot-links a{color:#2a2a2a;text-decoration:none;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace;transition:color .3s;}
+.foot-links a:hover{color:var(--gold);}
+.foot-copy{font-size:10px;color:#1e1e1e;font-family:'Space Mono',monospace;}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s ease,transform .65s ease;}
+.reveal.on{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.1s;}.d2{transition-delay:.2s;}.d3{transition-delay:.3s;}
+
+/* MOBILE */
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .nav-toggle{display:flex;}
+  .hero{padding:40px 5vw 80px;min-height:auto;}
+  .hero-layout{grid-template-columns:1fr;gap:32px;}
+  .hero-chart{order:-1;}
+  h1{font-size:clamp(36px,9vw,54px);}
+  .stats-inner{grid-template-columns:1fr 1fr;gap:0;}
+  .stat{padding:18px 12px;border-bottom:1px solid var(--border);}
+  .stat:nth-child(2n){border-right:none;}
+  .stat:nth-child(n+3){border-bottom:none;}
+  .strat-grid,.testi-grid,.prog-grid{grid-template-columns:1fr;}
+  .calc-grid{grid-template-columns:1fr;}
+  .section{padding:60px 5vw;}
+  .prog-card.hot::after{display:none;}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .strat-grid{grid-template-columns:1fr 1fr;}
+  .testi-grid{grid-template-columns:1fr 1fr;}
+  .prog-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="tradingview-widget-container" style="height:40px;">
+    <div class="tradingview-widget-container__widget"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+    {"symbols":[
+      {"proName":"FX:EURUSD","title":"EUR/USD"},{"proName":"FX:GBPUSD","title":"GBP/USD"},
+      {"proName":"FX:USDJPY","title":"USD/JPY"},{"proName":"TVC:GOLD","title":"XAU/USD"},
+      {"proName":"FX:GBPJPY","title":"GBP/JPY"},{"proName":"FX:AUDUSD","title":"AUD/USD"},
+      {"proName":"FX:EURJPY","title":"EUR/JPY"},{"proName":"BITSTAMP:BTCUSD","title":"BTC/USD"}
+    ],"showSymbolLogo":false,"colorTheme":"dark","isTransparent":true,"displayMode":"adaptive","locale":"en","backgroundColor":"#000"}
+    </script>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">Biddy<em>FX</em></a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="news.html">Market News</a>
+      <a href="contact.html">FAQ & Contact</a>
+      <a href="login.html" class="nav-btn">Student Login →</a>
+    </div>
+    <button class="nav-toggle" onclick="toggleNav()" aria-label="Menu">☰</button>
+  </div>
+  <div class="nav-mobile" id="navMobile">
+    <a href="index.html">Home</a>
+    <a href="news.html">Market News</a>
+    <a href="contact.html">FAQ & Contact</a>
+    <a href="login.html" style="color:var(--gold)!important;font-weight:700;">Student Login →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-layout">
+    <div>
+      <div class="hero-eyebrow"><div class="eyeline"></div><span class="eyetext">Elite Forex Education</span></div>
+      <h1>
+        Master<br>
+        <span class="gold">The Markets.</span><br>
+        <span class="ital">Own Your Future.</span>
+      </h1>
+      <div class="badges">
+        <span class="badge">Breakout Trading</span>
+        <span class="badge">Support & Resistance</span>
+        <span class="badge">Trendline Strategy</span>
+      </div>
+      <p class="hero-sub">Join thousands of traders who've transformed their mindset, strategy, and results through BiddyFX Academy's proven programs. Start free today — no card needed.</p>
+      <div class="hero-btns">
+        <a href="#programs" class="btn-gold">Start Free Today →</a>
+        <a href="#strategy" class="btn-out">See Strategies</a>
+      </div>
+    </div>
+    <div class="hero-chart">
+      <svg viewBox="0 0 560 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C9A84C" stop-opacity=".22"/>
+            <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Chart area fill -->
+        <polygon points="0,290 60,272 120,248 180,262 240,192 300,170 360,144 420,118 490,88 560,68 560,380 0,380" fill="url(#cg)"/>
+        <!-- Price line -->
+        <polyline points="0,290 60,272 120,248 180,262 240,192 300,170 360,144 420,118 490,88 560,68" fill="none" stroke="rgba(201,168,76,.6)" stroke-width="2"/>
+        <!-- Trendline -->
+        <line x1="0" y1="298" x2="560" y2="54" stroke="rgba(201,168,76,.5)" stroke-width="1.5" stroke-dasharray="10,5"/>
+        <text x="8" y="286" font-family="Space Mono,monospace" font-size="9" fill="rgba(201,168,76,.7)">TRENDLINE</text>
+        <!-- Support -->
+        <line x1="0" y1="262" x2="560" y2="262" stroke="rgba(0,200,150,.4)" stroke-width="1.5" stroke-dasharray="7,5"/>
+        <text x="8" y="256" font-family="Space Mono,monospace" font-size="9" fill="rgba(0,200,150,.7)">SUPPORT</text>
+        <!-- Resistance -->
+        <line x1="0" y1="172" x2="560" y2="172" stroke="rgba(255,68,68,.38)" stroke-width="1.5" stroke-dasharray="7,5"/>
+        <text x="8" y="166" font-family="Space Mono,monospace" font-size="9" fill="rgba(255,68,68,.65)">RESISTANCE</text>
+        <!-- Candles -->
+        <g fill="rgba(0,200,150,.5)">
+          <rect x="44" y="256" width="12" height="34" rx="1"/>
+          <rect x="104" y="238" width="12" height="26" rx="1"/>
+          <rect x="224" y="180" width="12" height="44" rx="1"/>
+          <rect x="284" y="160" width="12" height="26" rx="1"/>
+          <rect x="404" y="108" width="12" height="28" rx="1"/>
+          <rect x="474" y="78" width="12" height="24" rx="1"/>
+        </g>
+        <g fill="rgba(255,68,68,.45)">
+          <rect x="164" y="248" width="12" height="30" rx="1"/>
+          <rect x="344" y="134" width="12" height="28" rx="1"/>
+        </g>
+        <!-- Wicks -->
+        <g stroke="rgba(201,168,76,.35)" stroke-width="1.5">
+          <line x1="50" y1="246" x2="50" y2="298"/><line x1="110" y1="228" x2="110" y2="272"/>
+          <line x1="230" y1="170" x2="230" y2="236"/><line x1="290" y1="150" x2="290" y2="194"/>
+          <line x1="410" y1="98" x2="410" y2="146"/><line x1="480" y1="68" x2="480" y2="110"/>
+        </g>
+        <!-- Breakout arrow -->
+        <polygon points="430,82 444,98 437,98 437,118 423,118 423,98 416,98" fill="rgba(0,200,150,.6)"/>
+        <!-- Grid lines subtle -->
+        <line x1="0" y1="340" x2="560" y2="340" stroke="rgba(255,255,255,.03)" stroke-width="1"/>
+        <line x1="0" y1="220" x2="560" y2="220" stroke="rgba(255,255,255,.03)" stroke-width="1"/>
+        <line x1="0" y1="100" x2="560" y2="100" stroke="rgba(255,255,255,.03)" stroke-width="1"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-n">12K+</div><div class="stat-l">Active Traders</div></div>
+    <div class="stat"><div class="stat-n">94%</div><div class="stat-l">Success Rate</div></div>
+    <div class="stat"><div class="stat-n">$2.4M</div><div class="stat-l">Student Profits</div></div>
+    <div class="stat"><div class="stat-n">8 Yrs</div><div class="stat-l">Live Experience</div></div>
+  </div>
+</div>
+
+<!-- STRATEGY -->
+<section class="section" id="strategy">
+  <div class="sec-inner">
+    <div class="sec-eye reveal"><div class="sec-eye-line"></div><span class="sec-eye-text">Trading Method</span></div>
+    <h2 class="sec-title reveal">How We <em>Trade the Markets</em></h2>
+    <div class="strat-grid">
+      <div class="strat-card reveal">
+        <div class="strat-icon">📐</div>
+        <div class="strat-name">Support & Resistance</div>
+        <p class="strat-desc">Identify high-probability S&R zones where price has historically reacted. Wait for confirmation, enter with precision, and trade with clear invalidation every time.</p>
+        <div class="strat-tags"><span class="stag">Key Levels</span><span class="stag">Price Action</span><span class="stag">Zone Trading</span></div>
+      </div>
+      <div class="strat-card reveal d1">
+        <div class="strat-icon">💥</div>
+        <div class="strat-name">Breakout Trading</div>
+        <p class="strat-desc">When price consolidates and breaks out with momentum, we're positioned. We teach you to identify valid breakouts vs fakeouts — a crucial edge most retail traders never develop.</p>
+        <div class="strat-tags"><span class="stag">Momentum</span><span class="stag">Volume</span><span class="stag">Fakeout Filter</span></div>
+      </div>
+      <div class="strat-card reveal d2">
+        <div class="strat-icon">📈</div>
+        <div class="strat-name">Trendline Trading</div>
+        <p class="strat-desc">Dynamic trendlines give us the market's trajectory. Enter on trendline touches during pullbacks, ride the trend until structure breaks — consistent and repeatable.</p>
+        <div class="strat-tags"><span class="stag">Trend Following</span><span class="stag">Pullback Entry</span><span class="stag">Structure Break</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section class="section calc-bg" id="calculator">
+  <div class="sec-inner">
+    <div class="sec-eye reveal"><div class="sec-eye-line"></div><span class="sec-eye-text">Risk Management</span></div>
+    <h2 class="sec-title reveal">Position Size <em>Calculator</em></h2>
+    <div class="calc-grid">
+      <div class="calc-box reveal">
+        <div class="calc-title">Trade Parameters</div>
+        <div class="calc-sub">Calculate your exact lot size before every trade</div>
+        <label class="cl">Account Balance ($)</label>
+        <input type="number" class="ci" id="cBal" placeholder="e.g. 10000">
+        <label class="cl">Risk Per Trade (%)</label>
+        <input type="number" class="ci" id="cRisk" placeholder="e.g. 1" step="0.1">
+        <label class="cl">Currency Pair</label>
+        <select class="cs" id="cPair">
+          <option value="usd">EUR/USD</option><option value="usd">GBP/USD</option>
+          <option value="usd">AUD/USD</option><option value="usd">NZD/USD</option>
+          <option value="usd">USD/CAD</option><option value="jpy">USD/JPY</option>
+          <option value="jpy">EUR/JPY</option><option value="jpy">GBP/JPY</option>
+          <option value="gold">XAU/USD — Gold</option>
+        </select>
+        <label class="cl">Stop Loss (pips)</label>
+        <input type="number" class="ci" id="cSL" placeholder="e.g. 20">
+        <label class="cl">Take Profit (pips) — optional</label>
+        <input type="number" class="ci" id="cTP" placeholder="e.g. 60">
+        <button class="cbtn" onclick="calcPos()">Calculate →</button>
+        <div class="calc-note">⚠ Educational tool only. Not financial advice.</div>
+      </div>
+      <div class="calc-results reveal d1">
+        <div class="cr-hd">◆ TRADE ANALYSIS</div>
+        <div class="cr-row"><span class="cr-label">Risk Amount</span><span class="cr-val" id="crRisk">—</span></div>
+        <div class="cr-row"><span class="cr-label">Lot Size</span><span class="cr-val" id="crLot">—</span></div>
+        <div class="cr-row"><span class="cr-label">Units</span><span class="cr-val" id="crUnits">—</span></div>
+        <div class="cr-row"><span class="cr-label">Potential Profit</span><span class="cr-val g" id="crProfit">—</span></div>
+        <div class="cr-row"><span class="cr-label">Risk : Reward</span><span class="cr-val" id="crRR">—</span></div>
+        <div class="cr-row"><span class="cr-label">Assessment</span><span class="cr-val" id="crAssess" style="font-size:15px;">—</span></div>
+        <div class="risk-meter">
+          <div class="rm-labels"><span>Conservative ≤1%</span><span>Aggressive ≥3%</span></div>
+          <div class="rm-track"><div class="rm-fill" id="rFill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" id="results">
+  <div class="sec-inner">
+    <div class="sec-eye reveal"><div class="sec-eye-line"></div><span class="sec-eye-text">Student Results</span></div>
+    <h2 class="sec-title reveal">Real traders, <em>real results.</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">BiddyFX changed how I see charts. The breakout strategy alone paid back the course in the first month. Clean, consistent, and actually works.</p>
+        <div class="testi-author"><div class="testi-av">AJ</div><div><div class="testi-name">Ade Johnson</div><div class="testi-meta">+$8,400 in 90 days · EUR/USD</div></div></div>
+      </div>
+      <div class="testi-card reveal d1">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Passed my prop firm challenge in 6 weeks. The live sessions are invaluable — watching real breakout entries is worth more than any YouTube video.</p>
+        <div class="testi-author"><div class="testi-av">FK</div><div><div class="testi-name">Fatima K.</div><div class="testi-meta">Funded $50K · GBP/JPY</div></div></div>
+      </div>
+      <div class="testi-card reveal d2">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">The S&R framework is elite. I stopped overtrading once I understood how to wait for key level reactions. Community accountability is different here.</p>
+        <div class="testi-author"><div class="testi-av">TO</div><div><div class="testi-name">Tunde Okafor</div><div class="testi-meta">+$15,200 YTD · Multi-pair</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section class="section prog-bg" id="programs">
+  <div class="sec-inner">
+    <div class="sec-eye reveal"><div class="sec-eye-line"></div><span class="sec-eye-text">Programs</span></div>
+    <h2 class="sec-title reveal">Choose your <em>level of mastery.</em></h2>
+    <div class="prog-grid">
+      <div class="prog-card reveal">
+        <div class="prog-badge">Starter</div>
+        <div class="prog-free-tag">✓ Completely Free</div>
+        <div class="prog-name">Foundation</div>
+        <div class="prog-tag">Build your base — no credit card needed</div>
+        <ul class="prog-feats">
+          <li>Forex basics & chart reading</li>
+          <li>Support & resistance intro</li>
+          <li>Candlestick patterns module</li>
+          <li>Risk management basics</li>
+          <li>Student dashboard access</li>
+          <li>Community Discord access</li>
+        </ul>
+        <a href="login.html" class="prog-btn prog-btn-o">Start Free →</a>
+      </div>
+      <div class="prog-card hot reveal d1">
+        <div class="prog-badge">Pro</div>
+        <div class="prog-name">Pro Trader</div>
+        <div class="prog-tag">Full breakout & trend trading system</div>
+        <ul class="prog-feats">
+          <li>All Foundation content</li>
+          <li>Advanced breakout strategies</li>
+          <li>Trendline mastery module</li>
+          <li>Weekly live trading sessions</li>
+          <li>Signal alerts — London + NY</li>
+          <li>1-on-1 strategy call</li>
+          <li>Private mentorship group</li>
+        </ul>
+        <a href="contact.html" class="prog-btn prog-btn-s">Enroll Now →</a>
+      </div>
+      <div class="prog-card reveal d2">
+        <div class="prog-badge">Elite</div>
+        <div class="prog-name">Apex / Funded</div>
+        <div class="prog-tag">For serious prop firm traders</div>
+        <ul class="prog-feats">
+          <li>All Pro Trader content</li>
+          <li>Prop firm challenge guidance</li>
+          <li>Monthly 1-on-1 coaching</li>
+          <li>Custom trading plan built</li>
+          <li>Funded account roadmap</li>
+          <li>Exclusive mastermind access</li>
+        </ul>
+        <a href="contact.html" class="prog-btn prog-btn-o">Apply Now →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-logo">Biddy<em>FX</em> Academy</div>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="news.html">Market News</a>
+      <a href="contact.html">FAQ & Contact</a>
+      <a href="login.html">Student Login</a>
+    </div>
+    <div class="foot-copy">© 2025 BiddyFX Academy · Not financial advice</div>
+  </div>
+</footer>
+
+<script>
+// NAV TOGGLE
+function toggleNav(){document.getElementById('navMobile').classList.toggle('open');}
+
+// REVEAL
+document.querySelectorAll('.reveal').forEach(el=>{
+  new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('on');});},{threshold:.07}).observe(el);
+});
+
+// CALCULATOR
+function calcPos(){
+  const bal=parseFloat(document.getElementById('cBal').value)||0;
+  const risk=parseFloat(document.getElementById('cRisk').value)||0;
+  const sl=parseFloat(document.getElementById('cSL').value)||0;
+  const tp=parseFloat(document.getElementById('cTP').value)||0;
+  const pair=document.getElementById('cPair').value;
+  if(!bal||!risk||!sl)return;
+  const rAmt=(bal*risk)/100;
+  const pipVal=pair==='jpy'?6.7:pair==='gold'?1:10;
+  const lots=rAmt/(sl*pipVal);
+  const units=Math.round(lots*(pair==='gold'?100:100000));
+  const profit=tp>0?(tp/sl)*rAmt:0;
+  const rr=tp>0?tp/sl:0;
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('crRisk','$'+rAmt.toFixed(2));
+  s('crLot',lots.toFixed(4)+' lots');
+  s('crUnits',units.toLocaleString()+' units');
+  s('crProfit',profit>0?'$'+profit.toFixed(2):'Enter TP');
+  s('crRR',rr>0?'1 : '+rr.toFixed(2):'—');
+  const a=document.getElementById('crAssess');
+  if(rr>0){
+    if(rr>=3){a.textContent='🔥 Excellent';a.style.color='var(--green)';}
+    else if(rr>=2){a.textContent='✓ Good';a.style.color='var(--gold)';}
+    else if(rr>=1){a.textContent='⚠ Acceptable';a.style.color='#aaa';}
+    else{a.textContent='✗ Poor — skip';a.style.color='var(--red)';}
+  }else{a.textContent='Enter TP';a.style.color='var(--muted)';}
+  const f=document.getElementById('rFill');
+  f.style.width=Math.min(100,(risk/5)*100)+'%';
+  f.style.background=risk<=1?'var(--green)':risk<=2?'var(--gold)':'var(--red)';
+}
+['cBal','cRisk','cSL','cTP'].forEach(id=>document.getElementById(id)?.addEventListener('input',calcPos));
+document.getElementById('cPair')?.addEventListener('change',calcPos);
+</script>
+</body>
+</html>
