@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard — BiddyFX Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;
+  --glow:rgba(201,168,76,.1);--black:#000;--deep:#030303;
+  --card:#0A0A0A;--border:#1A1A1A;--border2:#222;
+  --green:#00C896;--red:#FF4444;--blue:#4A9EFF;
+  --text:#e8e0d0;--muted:#555;--dim:#2a2a2a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{height:100%;}
+body{background:var(--deep);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+
+/* ============================================================
+   AUTH SCREEN
+   ============================================================ */
+#authScreen{
+  position:fixed;inset:0;background:var(--deep);z-index:9000;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.auth-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 42%,rgba(201,168,76,.05),transparent 70%);}
+.auth-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.025) 1px,transparent 1px);background-size:52px 52px;}
+.auth-wrap{position:relative;z-index:2;width:100%;max-width:460px;}
+.auth-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:.04em;}
+.auth-logo em{font-style:italic;color:#fff;}
+.auth-logo-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-align:center;letter-spacing:.2em;text-transform:uppercase;margin-top:5px;margin-bottom:32px;}
+.auth-card{background:var(--card);border:1px solid var(--border);}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);}
+.auth-tab{flex:1;padding:15px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .3s;margin-bottom:-1px;}
+.auth-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.auth-body{padding:30px 28px;}
+.auth-form{display:none;}
+.auth-form.active{display:block;}
+.al{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.ai,.as{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:12px 13px;outline:none;transition:border-color .3s;appearance:none;margin-bottom:14px;}
+.ai:focus,.as:focus{border-color:var(--gold);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.auth-submit{width:100%;background:var(--gold);color:var(--black);padding:15px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;margin-top:2px;}
+.auth-submit:hover{background:var(--gold-light);}
+.auth-err{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;margin-top:10px;min-height:16px;}
+.auth-note{font-size:11px;color:var(--dim);margin-top:14px;text-align:center;font-family:'Space Mono',monospace;line-height:1.65;}
+.auth-note a{color:var(--gold);text-decoration:none;}
+
+/* ============================================================
+   DASHBOARD SHELL
+   ============================================================ */
+#dashboard{display:none;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:232px;
+  background:var(--black);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:200;
+  overflow-y:auto;transition:transform .3s;
+}
+.sidebar-logo{padding:24px 20px 18px;border-bottom:1px solid var(--border);}
+.sidebar-logo-text{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--gold);}
+.sidebar-logo-text em{font-style:italic;color:#fff;}
+.sidebar-logo-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-top:3px;}
+.sidebar-user{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;}
+.sidebar-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--black);font-size:13px;flex-shrink:0;}
+.sidebar-uname{font-size:13px;font-weight:700;color:var(--text);line-height:1.2;}
+.sidebar-utier{font-family:'Space Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-section{font-family:'Space Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase;padding:10px 20px 5px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 20px;color:var(--muted);font-size:13px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .22s;border:none;background:none;width:100%;text-align:left;border-right:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.02);}
+.nav-item.active{color:var(--gold);background:rgba(201,168,76,.05);border-right-color:var(--gold);}
+.nav-item .ni{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border);}
+.upgrade-box{background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.2);padding:14px;margin-bottom:12px;}
+.upgrade-box-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:5px;}
+.upgrade-box-text{font-size:11px;color:var(--muted);margin-bottom:11px;line-height:1.5;}
+.upgrade-box-btn{display:block;text-align:center;background:var(--gold);color:var(--black);padding:8px;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;transition:all .3s;}
+.upgrade-box-btn:hover{background:var(--gold-light);}
+.logout-btn{width:100%;background:none;border:1px solid var(--border);color:var(--muted);padding:9px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .3s;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* MOBILE TOPBAR */
+.mobile-topbar{display:none;background:var(--black);border-bottom:1px solid var(--border);padding:0 5vw;height:56px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.mobile-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--gold);}
+.mobile-logo em{font-style:italic;color:#fff;}
+.mobile-menu-btn{background:none;border:1px solid var(--border);color:var(--gold);width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mobile-nav{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:300;flex-direction:column;padding:24px 5vw;}
+.mobile-nav.open{display:flex;}
+.mobile-nav-close{align-self:flex-end;background:none;border:1px solid var(--border);color:var(--gold);width:36px;height:36px;font-size:18px;cursor:pointer;margin-bottom:24px;}
+.mobile-nav .nav-item{padding:14px 0;border-bottom:1px solid var(--border);border-right:none;font-size:15px;}
+
+/* MAIN CONTENT */
+.main{margin-left:232px;min-height:100vh;padding:32px 36px;}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap;}
+.page-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff;}
+.page-title em{font-style:italic;color:var(--gold);font-weight:400;}
+.live-pill{display:flex;align-items:center;gap:7px;background:rgba(0,200,150,.07);border:1px solid rgba(0,200,150,.18);padding:7px 13px;font-family:'Space Mono',monospace;font-size:9px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PANELS */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* ============================================================
+   OVERVIEW PANEL
+   ============================================================ */
+.ov-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.ov-stat{background:var(--card);border:1px solid var(--border);padding:20px 18px;}
+.ov-stat-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;}
+.ov-stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);line-height:1;}
+.ov-stat-sub{font-size:11px;color:var(--dim);margin-top:4px;font-family:'Space Mono',monospace;}
+.ov-stat.g .ov-stat-val{color:var(--green);}
+
+.ov-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px;}
+.ov-bottom{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+
+.widget{background:var(--card);border:1px solid var(--border);padding:24px;}
+.widget-title{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.widget-title span{flex:1;}
+.wt-tag{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.18);padding:2px 8px;font-size:8px;}
+
+/* Progress bars */
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:13px;}
+.prog-row:last-child{margin-bottom:0;}
+.prog-icon{font-size:18px;flex-shrink:0;}
+.prog-info{flex:1;min-width:0;}
+.prog-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prog-track{height:3px;background:var(--border2);}
+.prog-fill{height:100%;background:var(--gold);transition:width .6s ease;}
+.prog-pct{font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);flex-shrink:0;}
+
+/* Activity */
+.act-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.act-text{flex:1;font-size:12px;color:var(--muted);line-height:1.5;}
+.act-text strong{color:var(--text);}
+.act-time{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);flex-shrink:0;margin-top:3px;}
+
+/* Streak */
+.streak-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:14px;}
+.streak-day{width:32px;height:32px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.streak-day.done{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.28);color:var(--gold);}
+.streak-day.today{background:rgba(201,168,76,.18);border-color:var(--gold);}
+.streak-day-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.streak-day-check{font-size:10px;}
+
+/* Next lesson */
+.next-lesson{display:flex;gap:14px;align-items:center;}
+.nl-thumb{width:56px;height:56px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.18);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.nl-info{flex:1;}
+.nl-mod{font-family:'Space Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+.nl-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.3;}
+.nl-dur{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.btn-sm{display:inline-block;background:var(--gold);color:var(--black);padding:8px 16px;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;margin-top:8px;text-decoration:none;}
+.btn-sm:hover{background:var(--gold-light);}
+.btn-sm-o{background:none;border:1px solid rgba(201,168,76,.28);color:var(--gold);}
+.btn-sm-o:hover{background:var(--glow);border-color:var(--gold);}
+
+/* ============================================================
+   COURSES PANEL
+   ============================================================ */
+.module-section{margin-bottom:32px;}
+.module-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.module-icon{font-size:20px;}
+.module-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;}
+.module-meta{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.module-pct{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold);margin-left:auto;}
+.lessons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.lesson-card{background:var(--card);border:1px solid var(--border);padding:18px;position:relative;transition:all .25s;cursor:pointer;}
+.lesson-card:hover:not(.locked){border-color:rgba(201,168,76,.28);transform:translateY(-2px);}
+.lesson-card.done{border-left:2px solid var(--green);}
+.lesson-card.current{border-left:2px solid var(--gold);}
+.lesson-card.locked{opacity:.4;cursor:not-allowed;}
+.lesson-status{position:absolute;top:14px;right:14px;font-size:13px;}
+.lesson-num{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.1em;margin-bottom:7px;}
+.lesson-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px;line-height:1.3;}
+.lesson-dur{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);}
+.lesson-type-tag{display:inline-block;margin-top:7px;font-family:'Space Mono',monospace;font-size:8px;padding:3px 8px;letter-spacing:.06em;text-transform:uppercase;}
+.lt-v{background:rgba(74,158,255,.08);color:var(--blue);}
+.lt-r{background:rgba(201,168,76,.07);color:var(--gold);}
+.lt-q{background:rgba(0,200,150,.07);color:var(--green);}
+.locked-tag{display:inline-block;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.18);color:var(--red);font-family:'Space Mono',monospace;font-size:8px;padding:2px 8px;text-transform:uppercase;margin-top:7px;}
+.pro-locked-section{opacity:.55;margin-bottom:24px;}
+.pro-locked-banner{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:14px;}
+.plb-text{font-size:13px;color:var(--muted);}
+.plb-text strong{color:var(--gold);}
+
+/* ============================================================
+   LESSON VIEWER
+   ============================================================ */
+#lessonViewer{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);
+  z-index:7000;overflow-y:auto;
+}
+.lv-wrap{max-width:800px;margin:0 auto;padding:40px 24px;}
+.lv-back{background:none;border:1px solid var(--border);color:var(--muted);padding:9px 16px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .3s;margin-bottom:24px;}
+.lv-back:hover{border-color:var(--gold);color:var(--gold);}
+.lv-mod{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px;}
+.lv-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#fff;margin-bottom:8px;}
+.lv-meta{display:flex;gap:16px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:28px;}
+.lv-video{background:#000;border:1px solid var(--border);padding:52px 24px;text-align:center;margin-bottom:28px;}
+.lv-video-icon{font-size:44px;margin-bottom:12px;}
+.lv-video-text{color:var(--muted);font-size:13px;line-height:1.6;}
+.lv-content{color:#666;font-size:15px;line-height:1.9;margin-bottom:32px;}
+.lv-content h3{font-family:'Playfair Display',serif;font-size:19px;color:var(--text);margin:26px 0 11px;font-weight:700;}
+.lv-content p{margin-bottom:14px;}
+.lv-content .hl{background:rgba(201,168,76,.07);border-left:2px solid var(--gold);padding:13px 16px;color:var(--text);margin:18px 0;}
+.lv-footer{display:flex;align-items:center;gap:14px;}
+.lv-complete-btn{background:var(--green);color:var(--black);padding:13px 24px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;flex-shrink:0;}
+.lv-complete-btn.done{background:var(--border2);color:var(--muted);cursor:default;}
+.lv-progress-track{flex:1;height:3px;background:var(--border2);}
+.lv-progress-fill{height:100%;background:var(--gold);transition:width .5s ease;}
+.lv-progress-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;}
+
+/* ============================================================
+   CALCULATOR PANEL
+   ============================================================ */
+.calc-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.calc-box{background:var(--card);border:1px solid var(--border);padding:32px;}
+.calc-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;}
+.calc-sub{color:var(--muted);font-size:13px;margin-bottom:22px;}
+.cl{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.ci,.cs{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:11px 12px;outline:none;transition:border-color .3s;appearance:none;margin-bottom:13px;}
+.ci:focus,.cs:focus{border-color:var(--gold);}
+.cbtn{width:100%;background:var(--gold);color:var(--black);padding:13px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;}
+.cbtn:hover{background:var(--gold-light);}
+.calc-results{background:var(--card);border:1px solid var(--border);padding:32px;}
+.cr-hd{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.cr-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(26,26,26,.9);}
+.cr-label{color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;}
+.cr-val{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--gold);}
+.cr-val.g{color:var(--green);}.cr-val.r{color:var(--red);}
+.risk-meter{margin-top:16px;}
+.rm-labels{display:flex;justify-content:space-between;margin-bottom:5px;}
+.rm-labels span{font-family:'Space Mono',monospace;font-size:8px;color:var(--border2);}
+.rm-track{height:4px;background:#111;}
+.rm-fill{height:100%;background:var(--green);transition:width .5s,background .3s;}
+.calc-note{margin-top:14px;padding:11px 13px;background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.07);font-size:10px;color:#2e2e2e;line-height:1.65;font-family:'Space Mono',monospace;}
+
+/* ============================================================
+   SESSIONS PANEL
+   ============================================================ */
+.clock-bar{background:var(--card);border:1px solid var(--border);padding:14px 20px;display:flex;gap:20px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.cb-item{display:flex;flex-direction:column;gap:2px;}
+.cb-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.cb-val{font-family:'Space Mono',monospace;font-size:14px;color:var(--gold);}
+.sessions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px;}
+.sess-card{background:var(--card);border:1px solid var(--border);padding:24px;position:relative;overflow:hidden;transition:all .3s;}
+.sess-card.active-sess{border-color:var(--green);background:rgba(0,200,150,.02);}
+.sess-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sess-flag{font-size:24px;}
+.sess-status{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:5px;color:var(--muted);}
+.sess-card.active-sess .sess-status{color:var(--green);}
+.sess-sdot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.sess-card.active-sess .sess-sdot{animation:pulse 1.5s infinite;}
+.sess-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:3px;}
+.sess-utc{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);margin-bottom:3px;}
+.sess-local{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);margin-bottom:13px;}
+.sess-pairs{display:flex;flex-wrap:wrap;gap:5px;}
+.sess-pair{background:rgba(201,168,76,.05);color:#555;font-family:'Space Mono',monospace;font-size:8px;padding:3px 8px;}
+.sess-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--green);transition:width 1s linear;}
+.sessions-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.tips-card{background:var(--card);border:1px solid var(--border);padding:20px;}
+.tips-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;}
+.tips-item{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);}
+.tips-item:last-child{border-bottom:none;}
+.tips-item strong{color:var(--text);}
+
+/* ============================================================
+   PROFILE PANEL
+   ============================================================ */
+.profile-grid{display:grid;grid-template-columns:260px 1fr;gap:20px;}
+.profile-card{background:var(--card);border:1px solid var(--border);padding:28px;text-align:center;}
+.prof-av-big{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--black);font-size:26px;margin:0 auto 14px;}
+.prof-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:3px;}
+.prof-email{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;}
+.prof-tier{display:inline-block;background:var(--glow);border:1px solid rgba(201,168,76,.22);color:var(--gold);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.14em;padding:4px 12px;text-transform:uppercase;margin-bottom:18px;}
+.prof-stat{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.prof-stat:last-child{border-bottom:none;}
+.prof-stat-label{color:var(--muted);}
+.prof-stat-val{color:var(--text);font-weight:600;}
+.profile-form{background:var(--card);border:1px solid var(--border);padding:28px;}
+.pf-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:20px;}
+.pf-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pfg{margin-bottom:14px;}
+.pfl{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.pfi,.pfs{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:11px 12px;outline:none;transition:border-color .3s;appearance:none;}
+.pfi:focus,.pfs:focus{border-color:var(--gold);}
+.pf-save{background:var(--gold);color:var(--black);padding:13px 24px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;}
+.pf-save:hover{background:var(--gold-light);}
+.pf-saved{color:var(--green);font-family:'Space Mono',monospace;font-size:10px;margin-left:12px;display:none;}
+.divider{height:1px;background:var(--border);margin:22px 0;}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .mobile-topbar{display:flex;}
+  .main{margin-left:0;padding:20px 5vw;}
+  .ov-stats{grid-template-columns:1fr 1fr;}
+  .ov-grid,.ov-bottom,.calc-layout,.sessions-grid,.sessions-tips,.profile-grid{grid-template-columns:1fr;}
+  .lessons-grid{grid-template-columns:1fr 1fr;}
+  .pf-two{grid-template-columns:1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .lv-wrap{padding:24px 16px;}
+}
+@media(max-width:480px){
+  .lessons-grid{grid-template-columns:1fr;}
+  .ov-stats{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     AUTH SCREEN
+     ============================================================ -->
+<div id="authScreen">
+  <div class="auth-bg"></div>
+  <div class="auth-grid"></div>
+  <div class="auth-wrap">
+    <div class="auth-logo">Biddy<em>FX</em></div>
+    <div class="auth-logo-sub">Student Portal</div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('register')">Create Account</button>
+      </div>
+      <div class="auth-body">
+
+        <!-- LOGIN -->
+        <div class="auth-form active" id="loginForm">
+          <label class="al">Email Address</label>
+          <input type="email" class="ai" id="loginEmail" placeholder="your@email.com">
+          <label class="al">Password</label>
+          <input type="password" class="ai" id="loginPass" placeholder="Your password">
+          <button class="auth-submit" onclick="handleLogin()">Sign In →</button>
+          <div class="auth-err" id="loginErr"></div>
+          <div class="auth-note">No account? <a href="#" onclick="switchTab('register');return false;">Register free →</a><br><br><a href="index.html">← Back to homepage</a></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="auth-form" id="registerForm">
+          <div class="two-col">
+            <div><label class="al">First Name</label><input type="text" class="ai" id="regFirst" placeholder="John"></div>
+            <div><label class="al">Last Name</label><input type="text" class="ai" id="regLast" placeholder="Doe"></div>
+          </div>
+          <label class="al">Email Address</label>
+          <input type="email" class="ai" id="regEmail" placeholder="your@email.com">
+          <label class="al">Password (min. 8 chars)</label>
+          <input type="password" class="ai" id="regPass" placeholder="Choose a password">
+          <label class="al">Trading Experience</label>
+          <select class="as" id="regExp">
+            <option value="">Select your level</option>
+            <option>Complete beginner</option>
+            <option>Less than 6 months</option>
+            <option>6 months – 1 year</option>
+            <option>1–3 years</option>
+            <option>3+ years</option>
+          </select>
+          <button class="auth-submit" onclick="handleRegister()">Create Free Account →</button>
+          <div class="auth-err" id="regErr"></div>
+          <div class="auth-note">Free Foundation access is instant. No card needed.<br><a href="index.html">← Back to homepage</a></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DASHBOARD
+     ============================================================ -->
+<div id="dashboard">
+
+  <!-- MOBILE TOPBAR -->
+  <div class="mobile-topbar">
+    <div class="mobile-logo">Biddy<em>FX</em></div>
+    <button class="mobile-menu-btn" onclick="toggleMobileNav()">☰</button>
+  </div>
+
+  <!-- MOBILE NAV OVERLAY -->
+  <div class="mobile-nav" id="mobileNav">
+    <button class="mobile-nav-close" onclick="toggleMobileNav()">✕</button>
+    <button class="nav-item" onclick="showPanel('overview');toggleMobileNav()"><span class="ni">🏠</span>Overview</button>
+    <button class="nav-item" onclick="showPanel('courses');toggleMobileNav()"><span class="ni">📚</span>My Courses</button>
+    <button class="nav-item" onclick="showPanel('calculator');toggleMobileNav()"><span class="ni">🧮</span>Calculator</button>
+    <button class="nav-item" onclick="showPanel('sessions');toggleMobileNav()"><span class="ni">🌍</span>Sessions</button>
+    <button class="nav-item" onclick="showPanel('profile');toggleMobileNav()"><span class="ni">👤</span>Profile</button>
+    <button class="nav-item" onclick="handleLogout()" style="color:var(--red);margin-top:10px;"><span class="ni">⬡</span>Sign Out</button>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-text">Biddy<em>FX</em></div>
+      <div class="sidebar-logo-sub">Academy Portal</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-av" id="sideAv">—</div>
+      <div>
+        <div class="sidebar-uname" id="sideName">—</div>
+        <div class="sidebar-utier" id="sideTier">Foundation</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <button class="nav-item active" onclick="showPanel('overview')"><span class="ni">🏠</span>Overview</button>
+      <button class="nav-item" onclick="showPanel('courses')"><span class="ni">📚</span>My Courses</button>
+      <div class="nav-section">Tools</div>
+      <button class="nav-item" onclick="showPanel('calculator')"><span class="ni">🧮</span>Position Calculator</button>
+      <button class="nav-item" onclick="showPanel('sessions')"><span class="ni">🌍</span>Trading Sessions</button>
+      <div class="nav-section">Account</div>
+      <button class="nav-item" onclick="showPanel('profile')"><span class="ni">👤</span>Profile & Settings</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="upgrade-box">
+        <div class="upgrade-box-title">Upgrade to Pro</div>
+        <div class="upgrade-box-text">Live sessions, signals, advanced strategies.</div>
+        <a href="index.html#programs" class="upgrade-box-btn">Upgrade →</a>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">⬡ Sign Out</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">Dashboard</div>
+      <div class="live-pill"><div class="live-dot"></div><span id="sessionLabel">Checking markets...</span></div>
+    </div>
+
+    <!-- ===== OVERVIEW ===== -->
+    <div class="panel active" id="panel-overview">
+      <div class="ov-stats">
+        <div class="ov-stat"><div class="ov-stat-label">Lessons Done</div><div class="ov-stat-val" id="ovLessons">0</div><div class="ov-stat-sub">of 18 free lessons</div></div>
+        <div class="ov-stat g"><div class="ov-stat-label">Progress</div><div class="ov-stat-val" id="ovPct">0%</div><div class="ov-stat-sub">Foundation course</div></div>
+        <div class="ov-stat"><div class="ov-stat-label">Day Streak</div><div class="ov-stat-val" id="ovStreak">1</div><div class="ov-stat-sub">🔥 Keep going</div></div>
+        <div class="ov-stat"><div class="ov-stat-label">Active Session</div><div class="ov-stat-val" id="ovSess" style="font-size:16px;">—</div><div class="ov-stat-sub" id="ovSessSub">Loading...</div></div>
+      </div>
+      <div class="ov-grid">
+        <div class="widget">
+          <div class="widget-title"><span>Course Progress</span><span class="wt-tag">Foundation</span></div>
+          <div id="progList"></div>
+        </div>
+        <div class="widget">
+          <div class="widget-title"><span>Recent Activity</span></div>
+          <div id="actList">
+            <div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>Account created</strong> — Welcome to BiddyFX!</div><div class="act-time">Today</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ov-bottom">
+        <div class="widget">
+          <div class="widget-title"><span>7-Day Streak</span></div>
+          <div class="streak-row" id="streakRow"></div>
+        </div>
+        <div class="widget">
+          <div class="widget-title"><span>Next Lesson</span></div>
+          <div id="nextLessonWidget"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COURSES ===== -->
+    <div class="panel" id="panel-courses">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;">My <em style="font-style:italic;color:var(--gold);font-weight:400;">Courses</em></h2>
+          <p style="color:var(--muted);font-size:13px;margin-top:4px;">Foundation program — 18 lessons, completely free</p>
+        </div>
+        <span style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);color:var(--green);font-family:'Space Mono',monospace;font-size:8px;padding:4px 11px;text-transform:uppercase;letter-spacing:.1em;">✓ Free Access</span>
+      </div>
+      <div id="courseContent"></div>
+    </div>
+
+    <!-- ===== CALCULATOR ===== -->
+    <div class="panel" id="panel-calculator">
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">Position Size <em style="font-style:italic;color:var(--gold);font-weight:400;">Calculator</em></h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">Calculate your exact lot size before every trade. Protect your capital.</p>
+      <div class="calc-layout">
+        <div class="calc-box">
+          <div class="calc-title">Trade Parameters</div>
+          <div class="calc-sub">Enter your trade details</div>
+          <label class="cl">Account Balance ($)</label>
+          <input type="number" class="ci" id="cBal" placeholder="e.g. 10000">
+          <label class="cl">Risk Per Trade (%)</label>
+          <input type="number" class="ci" id="cRisk" placeholder="e.g. 1" step="0.1">
+          <label class="cl">Currency Pair</label>
+          <select class="cs" id="cPair">
+            <option value="usd">EUR/USD</option><option value="usd">GBP/USD</option>
+            <option value="usd">AUD/USD</option><option value="usd">NZD/USD</option>
+            <option value="usd">USD/CAD</option><option value="usd">USD/CHF</option>
+            <option value="jpy">USD/JPY</option><option value="jpy">EUR/JPY</option>
+            <option value="jpy">GBP/JPY</option><option value="gold">XAU/USD — Gold</option>
+          </select>
+          <label class="cl">Stop Loss (pips)</label>
+          <input type="number" class="ci" id="cSL" placeholder="e.g. 20">
+          <label class="cl">Take Profit (pips) — optional</label>
+          <input type="number" class="ci" id="cTP" placeholder="e.g. 60">
+          <button class="cbtn" onclick="calcPos()">Calculate →</button>
+          <div class="calc-note">⚠ Educational tool only. Not financial advice.</div>
+        </div>
+        <div class="calc-results">
+          <div class="cr-hd">◆ TRADE ANALYSIS</div>
+          <div class="cr-row"><span class="cr-label">Risk Amount</span><span class="cr-val" id="crRisk">—</span></div>
+          <div class="cr-row"><span class="cr-label">Lot Size</span><span class="cr-val" id="crLot">—</span></div>
+          <div class="cr-row"><span class="cr-label">Units</span><span class="cr-val" id="crUnits">—</span></div>
+          <div class="cr-row"><span class="cr-label">Potential Profit</span><span class="cr-val g" id="crProfit">—</span></div>
+          <div class="cr-row"><span class="cr-label">Risk : Reward</span><span class="cr-val" id="crRR">—</span></div>
+          <div class="cr-row"><span class="cr-label">Assessment</span><span class="cr-val" id="crAssess" style="font-size:14px;">—</span></div>
+          <div class="risk-meter">
+            <div class="rm-labels"><span>Conservative ≤1%</span><span>Aggressive ≥3%</span></div>
+            <div class="rm-track"><div class="rm-fill" id="rFill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SESSIONS ===== -->
+    <div class="panel" id="panel-sessions">
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">Trading <em style="font-style:italic;color:var(--gold);font-weight:400;">Sessions</em></h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Trade the highest-volume windows for the best setups.</p>
+      <div class="clock-bar">
+        <div class="cb-item"><div class="cb-label">Your Time</div><div class="cb-val" id="localTime">--:--:--</div></div>
+        <div style="width:1px;height:18px;background:var(--border);"></div>
+        <div class="cb-item"><div class="cb-label">UTC</div><div class="cb-val" id="utcTime" style="color:#aaa;">--:--:-- UTC</div></div>
+        <div style="flex:1;"></div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);">Best volatility: London–NY overlap 1–5 PM UTC</div>
+      </div>
+      <div class="sessions-grid">
+        <div class="sess-card" id="sSydney">
+          <div class="sess-head"><div class="sess-flag">🇦🇺</div><div class="sess-status"><div class="sess-sdot"></div><span id="sSydneyS">CLOSED</span></div></div>
+          <div class="sess-name">Sydney</div>
+          <div class="sess-utc">10:00 PM – 7:00 AM UTC</div>
+          <div class="sess-local" id="sSydneyL">—</div>
+          <div class="sess-pairs"><span class="sess-pair">AUD/USD</span><span class="sess-pair">NZD/USD</span><span class="sess-pair">AUD/JPY</span></div>
+          <div class="sess-bar" id="sSydneyB" style="width:0%"></div>
+        </div>
+        <div class="sess-card" id="sTokyo">
+          <div class="sess-head"><div class="sess-flag">🇯🇵</div><div class="sess-status"><div class="sess-sdot"></div><span id="sTokyoS">CLOSED</span></div></div>
+          <div class="sess-name">Tokyo</div>
+          <div class="sess-utc">12:00 AM – 9:00 AM UTC</div>
+          <div class="sess-local" id="sTokyoL">—</div>
+          <div class="sess-pairs"><span class="sess-pair">USD/JPY</span><span class="sess-pair">EUR/JPY</span><span class="sess-pair">GBP/JPY</span></div>
+          <div class="sess-bar" id="sTokyoB" style="width:0%"></div>
+        </div>
+        <div class="sess-card" id="sLondon">
+          <div class="sess-head"><div class="sess-flag">🇬🇧</div><div class="sess-status"><div class="sess-sdot"></div><span id="sLondonS">CLOSED</span></div></div>
+          <div class="sess-name">London</div>
+          <div class="sess-utc">8:00 AM – 5:00 PM UTC</div>
+          <div class="sess-local" id="sLondonL">—</div>
+          <div class="sess-pairs"><span class="sess-pair">EUR/USD</span><span class="sess-pair">GBP/USD</span><span class="sess-pair">EUR/GBP</span></div>
+          <div class="sess-bar" id="sLondonB" style="width:0%"></div>
+        </div>
+        <div class="sess-card" id="sNY">
+          <div class="sess-head"><div class="sess-flag">🇺🇸</div><div class="sess-status"><div class="sess-sdot"></div><span id="sNYS">CLOSED</span></div></div>
+          <div class="sess-name">New York</div>
+          <div class="sess-utc">1:00 PM – 10:00 PM UTC</div>
+          <div class="sess-local" id="sNYL">—</div>
+          <div class="sess-pairs"><span class="sess-pair">EUR/USD</span><span class="sess-pair">USD/CAD</span><span class="sess-pair">GBP/USD</span></div>
+          <div class="sess-bar" id="sNYB" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="sessions-tips">
+        <div class="tips-card">
+          <div class="tips-title">💥 Best for Breakouts</div>
+          <div class="tips-item"><span>London Open</span><strong>8:00 AM UTC</strong></div>
+          <div class="tips-item"><span>NY Open</span><strong>1:00 PM UTC</strong></div>
+          <div class="tips-item"><span>London–NY Overlap</span><strong>1–5 PM UTC</strong></div>
+        </div>
+        <div class="tips-card">
+          <div class="tips-title">📐 Best for S&R</div>
+          <div class="tips-item"><span>London Session</span><strong>Major reversals</strong></div>
+          <div class="tips-item"><span>NY Midday</span><strong>Retests common</strong></div>
+          <div class="tips-item"><span>Asian Range</span><strong>Define key levels</strong></div>
+        </div>
+        <div class="tips-card">
+          <div class="tips-title">⚠ Avoid Trading</div>
+          <div class="tips-item"><span>Asian Session</span><strong>Low volatility</strong></div>
+          <div class="tips-item"><span>Post-NY Close</span><strong>Thin market</strong></div>
+          <div class="tips-item"><span>Weekend</span><strong>Markets closed</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PROFILE ===== -->
+    <div class="panel" id="panel-profile">
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:24px;">Profile & <em style="font-style:italic;color:var(--gold);font-weight:400;">Settings</em></h2>
+      <div class="profile-grid">
+        <div class="profile-card">
+          <div class="prof-av-big" id="profAv">—</div>
+          <div class="prof-name" id="profName">—</div>
+          <div class="prof-email" id="profEmail">—</div>
+          <div class="prof-tier" id="profTier">Foundation · Free</div>
+          <div class="divider"></div>
+          <div class="prof-stat"><span class="prof-stat-label">Joined</span><span class="prof-stat-val" id="profJoined">—</span></div>
+          <div class="prof-stat"><span class="prof-stat-label">Lessons Done</span><span class="prof-stat-val" id="profLessons">—</span></div>
+          <div class="prof-stat"><span class="prof-stat-label">Progress</span><span class="prof-stat-val" id="profProgress">—</span></div>
+          <div class="prof-stat"><span class="prof-stat-label">Experience</span><span class="prof-stat-val" id="profExp">—</span></div>
+        </div>
+        <div class="profile-form">
+          <div class="pf-title">Update Details</div>
+          <div class="pf-two">
+            <div class="pfg"><label class="pfl">First Name</label><input type="text" class="pfi" id="pfFirst"></div>
+            <div class="pfg"><label class="pfl">Last Name</label><input type="text" class="pfi" id="pfLast"></div>
+          </div>
+          <div class="pfg"><label class="pfl">Email</label><input type="email" class="pfi" id="pfEmail"></div>
+          <div class="pfg"><label class="pfl">WhatsApp / Phone</label><input type="text" class="pfi" id="pfPhone" placeholder="+234 800 000 0000"></div>
+          <div class="pfg"><label class="pfl">Trading Experience</label>
+            <select class="pfs" id="pfExp">
+              <option>Complete beginner</option><option>Less than 6 months</option>
+              <option>6 months – 1 year</option><option>1–3 years</option><option>3+ years</option>
+            </select>
+          </div>
+          <div class="pfg"><label class="pfl">New Password (leave blank to keep)</label><input type="password" class="pfi" id="pfPass" placeholder="Enter new password"></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="pf-save" onclick="saveProfile()">Save Changes</button>
+            <span class="pf-saved" id="pfSaved">✓ Saved!</span>
+          </div>
+          <div class="divider"></div>
+          <div style="padding:18px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);">
+            <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:6px;">Upgrade to Pro Trader</div>
+            <div style="color:var(--muted);font-size:13px;margin-bottom:12px;line-height:1.55;">Unlock advanced strategies, live sessions, and weekly signals.</div>
+            <a href="index.html#programs" class="btn-sm">Upgrade Now →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- LESSON VIEWER -->
+<div id="lessonViewer">
+  <div class="lv-wrap">
+    <button class="lv-back" onclick="closeLesson()">← Back to Courses</button>
+    <div class="lv-mod" id="lvMod"></div>
+    <div class="lv-title" id="lvTitle"></div>
+    <div class="lv-meta"><span id="lvDur"></span><span id="lvType"></span></div>
+    <div class="lv-video">
+      <div class="lv-video-icon">▶️</div>
+      <div class="lv-video-text">Video lesson content loads here in production.<br>Connect Vimeo, YouTube, or Wistia to your player.</div>
+    </div>
+    <div class="lv-content" id="lvContent"></div>
+    <div class="lv-footer">
+      <button class="lv-complete-btn" id="lvBtn" onclick="markComplete()">✓ Mark as Complete</button>
+      <div class="lv-progress-track"><div class="lv-progress-fill" id="lvFill"></div></div>
+      <span class="lv-progress-text" id="lvPctText"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// COURSE DATA
+// ============================================================
+const COURSES = [
+  {id:'m1',icon:'📖',title:'Forex Fundamentals',lessons:[
+    {id:'l1',title:'What is the Forex Market?',dur:'12 min',type:'video',content:`<h3>Understanding the Forex Market</h3><p>The foreign exchange market (Forex) is the world's largest financial market with over $7.5 trillion traded daily. It operates 24 hours a day, 5 days a week across major financial centers globally.</p><div class="hl">Key insight: Forex is decentralized — you're trading directly between banks, institutions, and other traders. Your broker acts as the intermediary.</div><h3>How Currency Pairs Work</h3><p>Currencies are always quoted in pairs. EUR/USD means you're comparing the Euro against the US Dollar. If EUR/USD = 1.0850, one Euro buys 1.0850 US Dollars. When you buy EUR/USD, you buy Euros and simultaneously sell US Dollars.</p><h3>Why Trade Forex?</h3><p>High liquidity, 24/5 access, low barriers to entry, and the ability to profit in both rising and falling markets make Forex attractive for disciplined traders worldwide.</p>`},
+    {id:'l2',title:'Understanding Currency Pairs',dur:'15 min',type:'video',content:`<h3>Major, Minor & Exotic Pairs</h3><p>Major pairs all include the US Dollar and are the most liquid: EUR/USD, GBP/USD, USD/JPY, USD/CHF, AUD/USD, USD/CAD, NZD/USD.</p><div class="hl">At BiddyFX we focus on EUR/USD, GBP/USD, GBP/JPY, and XAU/USD (Gold). These offer the best setups for our breakout and S&R strategies.</div><h3>Reading a Quote</h3><p>Every pair has a bid price (market buys from you) and an ask price (market sells to you). The difference is the spread — your broker's fee. Tighter spreads mean lower cost per trade.</p><h3>Pip Values</h3><p>A pip is the smallest price move — the 4th decimal place (0.0001) for most pairs. For JPY pairs it's the 2nd decimal (0.01). Understanding pip values is essential for calculating risk correctly.</p>`},
+    {id:'l3',title:'How to Read Candlestick Charts',dur:'18 min',type:'video',content:`<h3>The Language of Price Action</h3><p>Each candle shows four prices: Open, High, Low, and Close (OHLC). The body shows the range between open and close. The wicks show the extremes reached during the period.</p><div class="hl">Green candle = price closed higher than it opened (bullish). Red candle = closed lower than it opened (bearish).</div><h3>Key Patterns</h3><p><strong>Pin Bar</strong> — Long wick, small body. Price was rejected at a level. Extremely powerful at key S&R zones.</p><p><strong>Engulfing Pattern</strong> — A candle that completely engulfs the previous candle's body. Bullish engulfing at support = strong buy signal. Bearish at resistance = strong sell signal.</p><p><strong>Doji</strong> — Open and close nearly the same. Shows market indecision. Often signals potential reversal after a strong trend.</p>`},
+    {id:'l4',title:'Pips, Lots & Leverage Explained',dur:'14 min',type:'video',content:`<h3>Lot Sizes</h3><p>A lot is the standard unit for measuring a trade. Standard lot = 100,000 units. Mini lot = 10,000 units. Micro lot = 1,000 units.</p><div class="hl">For a standard lot on EUR/USD, each pip = $10. For a mini lot = $1 per pip. This is why position sizing matters — use the calculator before every trade.</div><h3>Leverage</h3><p>Leverage lets you control a large position with smaller capital. 1:100 leverage means $1,000 controls $100,000. It amplifies both profits and losses equally. We recommend never exceeding 1:30 for beginners.</p>`},
+    {id:'l5',title:'Your First Trade — Step by Step',dur:'20 min',type:'video',content:`<h3>Setting Up Your Demo Account</h3><p>Always practice on a demo account before risking real money. Use MetaTrader 4 or MetaTrader 5 from your broker. Get a demo account with virtual funds and practice every strategy we teach before going live.</p><div class="hl">Rule: Do not go live until you've been consistently profitable on demo for at least 30 days. Most traders rush this step and it costs them dearly.</div><h3>Executing a Trade</h3><p>1. Identify a setup using S&R or trendline framework. 2. Calculate your lot size using the position calculator. 3. Set stop loss below nearest support (for buys) or above resistance (for sells). 4. Set take profit at next key level — minimum 1:2 RR. 5. Execute. 6. Monitor but don't micromanage.</p>`},
+    {id:'l6',title:'Quiz: Forex Fundamentals',dur:'5 min',type:'quiz',content:`<h3>Test Your Knowledge</h3><p>Review these questions before moving to the next module.</p><p><strong>Q1:</strong> What does EUR/USD = 1.0850 mean?<br><em>A: 1 Euro buys 1.0850 US Dollars</em></p><p><strong>Q2:</strong> How many units is a standard lot?<br><em>A: 100,000 units</em></p><p><strong>Q3:</strong> What is a pip for EUR/USD?<br><em>A: 0.0001 — the 4th decimal place</em></p><p><strong>Q4:</strong> What does a Doji candle signal?<br><em>A: Market indecision — potential reversal</em></p><div class="hl">Mark complete when you can answer all 4 without looking. Take your time — this foundation supports everything else.</div>`}
+  ]},
+  {id:'m2',icon:'📐',title:'Support & Resistance',lessons:[
+    {id:'l7',title:'What is Support & Resistance?',dur:'16 min',type:'video',content:`<h3>The Bedrock of Technical Analysis</h3><p>Support is a price level where buying pressure prevents the price from falling further. Resistance is a level where selling pressure prevents the price from rising further. These represent areas of value — where institutions and banks have placed large orders.</p><div class="hl">Key concept: S&R are zones, not exact lines. Think in areas, not points. This mental shift will dramatically improve your entry accuracy.</div><h3>How to Identify Valid Levels</h3><p>Look for: 3+ touches at the same level (more touches = stronger level). Strong reactions from the level. The level appears on a higher timeframe (Daily > 4H > 1H). Previous support becoming resistance after a break — called role reversal.</p>`},
+    {id:'l8',title:'Drawing S&R Zones Like a Pro',dur:'19 min',type:'video',content:`<h3>The Right Way to Draw Levels</h3><p>Start on the Daily chart. Identify the most obvious swing highs and lows that price has respected. Draw your zone from the body close of the candle that caused the reaction — not the wick extreme. Give it a thickness of 10–20 pips to account for spread and volatility.</p><div class="hl">Common mistake: Drawing too many lines. If your chart is full of horizontals, you can't see anything. Keep only 2–3 major levels per timeframe at once.</div><h3>Zone Freshness</h3><p>A fresh zone (never retested) is stronger than an old zone (tested multiple times). Each touch weakens a zone. After 4–5 touches, a zone may break. A broken support zone often becomes new resistance — creating some of the best trade setups available.</p>`},
+    {id:'l9',title:'Trading Bounces from S&R',dur:'22 min',type:'video',content:`<h3>The Bounce Setup</h3><p>Wait for price to reach your pre-drawn S&R zone. Do NOT enter immediately when price touches the zone. Wait for a confirmation candle — a pin bar, engulfing candle, or inside bar that closes back toward the trend direction. This confirmation is your entry signal.</p><div class="hl">Patience is your edge. Amateur traders jump in the moment price touches S&R. Professional traders wait for the market to show its hand through confirmation first.</div><h3>Setting Your Levels</h3><p>Stop Loss: 5–10 pips beyond the far edge of the zone. Take Profit: Next major S&R zone in the direction of your trade. If the next level is too close for 1:2 RR, skip the trade entirely.</p>`},
+    {id:'l10',title:'Role Reversal & Zone Confluence',dur:'17 min',type:'reading',content:`<h3>Role Reversal — The Most Powerful S&R Concept</h3><p>When a strong support breaks, it becomes resistance. When resistance breaks, it becomes support. These role-reversed zones are often the strongest areas to trade from because institutions are defending the level they just broke.</p><div class="hl">Example: EUR/USD breaks above major resistance at 1.0900. On the first pullback, 1.0900 should now act as support. This retest is one of the highest-probability setups available in forex.</div><h3>Zone Confluence — Stacking the Odds</h3><p>Confluence means multiple factors pointing to the same level. An S&R zone + a psychological round number (e.g. 1.0900) + a moving average at the same level = extremely high-probability setup. Never trade S&R in isolation. Always look for confluence to stack the odds in your favour.</p>`}
+  ]},
+  {id:'m3',icon:'💥',title:'Breakout Trading',lessons:[
+    {id:'l11',title:'What Makes a Valid Breakout?',dur:'18 min',type:'video',content:`<h3>The Anatomy of a Real Breakout</h3><p>A breakout occurs when price moves convincingly beyond a key S&R level with momentum and closes beyond it. Not all breakouts are equal — many are fakeouts designed to trap retail traders. Knowing the difference is your entire edge.</p><div class="hl">Golden rule: A valid breakout needs a strong candle body closing BEYOND the level — not just a wick. Wicks through levels are often fakeouts. Wait for the candle body to close on the other side.</div><h3>Signs of a Valid Breakout</h3><p>Strong momentum candle closing well beyond the level. Volume spike if visible. Clear consolidation before the breakout — the longer the consolidation, the more explosive the move. Breakout aligns with the higher timeframe trend direction.</p>`},
+    {id:'l12',title:'Fakeout Detection — Never Get Trapped',dur:'20 min',type:'video',content:`<h3>How to Spot a Fakeout</h3><p>A fakeout occurs when price briefly moves beyond a level but then quickly reverses back inside. These are extremely common and trap thousands of retail traders who enter prematurely.</p><div class="hl">Fakeout clue: If the breakout candle has a very long wick beyond the level but closes back inside — that is almost certainly a fakeout. The market swept stop loss liquidity and reversed. You want to be on the right side of this move.</div><h3>The Breakout Retest Strategy</h3><p>Instead of entering on the initial breakout (high risk), wait for price to break, then pull back and retest the broken level from the other side. Enter on the retest with tight stop and excellent RR. This is the safer, more professional approach.</p>`},
+    {id:'l13',title:'Entering Breakout Trades with Precision',dur:'16 min',type:'video',content:`<h3>Two Entry Methods</h3><p><strong>Method 1 — Aggressive:</strong> Enter as soon as the candle closes beyond the level with momentum. Higher risk but you're in from the beginning of the move. Suitable for experienced traders.</p><p><strong>Method 2 — Conservative (Retest):</strong> Wait for price to break, pull back and retest the broken level, then enter on confirmation. Better RR, lower risk of being caught in a fakeout. Recommended for all beginners.</p><div class="hl">At BiddyFX we predominantly use the retest method. Yes, you miss some trades. But the trades you do take have dramatically better probability and reward. Quality over quantity — always.</div>`},
+    {id:'l14',title:'Quiz: Breakout Trading',dur:'5 min',type:'quiz',content:`<h3>Breakout Trading Quiz</h3><p><strong>Q1:</strong> What is the golden rule for a valid breakout?<br><em>A: The candle body must close beyond the level — wicks don't count</em></p><p><strong>Q2:</strong> What is a fakeout?<br><em>A: Price briefly breaks a level but reverses back inside quickly</em></p><p><strong>Q3:</strong> What is the retest method?<br><em>A: Wait for the break, then enter on the pullback retest of the broken level</em></p><p><strong>Q4:</strong> What does long consolidation before a breakout signal?<br><em>A: A more explosive move when the breakout eventually occurs</em></p>`}
+  ]},
+  {id:'m4',icon:'📈',title:'Trendline Strategy',lessons:[
+    {id:'l15',title:'Drawing Trendlines Correctly',dur:'14 min',type:'video',content:`<h3>The Art of the Trendline</h3><p>A trendline connects at least two significant swing lows (uptrend) or swing highs (downtrend). Connect the most prominent pivots the market has clearly reacted from — not random noise.</p><div class="hl">Two points make a line. Three points confirm a trend. The more touches, the more powerful the trendline becomes as a trading tool.</div><h3>Uptrend Trendlines</h3><p>Connect the two most significant higher lows. Extend the line to the right. Each touch from above is a potential buy — you're buying into the trend at a discounted price during a healthy pullback.</p><h3>Downtrend Trendlines</h3><p>Connect the two most significant lower highs. Each touch from below is a potential sell — selling into the trend as price pulls back up before continuing lower.</p>`},
+    {id:'l16',title:'Trading Trendline Bounces',dur:'18 min',type:'video',content:`<h3>The Trendline Bounce Setup</h3><p>Wait for price to pull back and touch your trendline. Wait for a confirmation candle (pin bar, engulfing, inside bar) showing the market respects the trendline. Enter in the direction of the trend with stop beyond the trendline.</p><div class="hl">The strongest trendline trades occur when your trendline coincides with a key S&R level. Trendline + S&R zone = extremely high-probability confluence setup. Always look for this combination.</div><h3>Target Setting</h3><p>For uptrend trades: target the previous swing high or major resistance. For downtrend trades: target the previous swing low or major support. Trail your stop behind each new higher low to lock in profits as the trend continues.</p>`},
+    {id:'l17',title:'Trendline Breaks & What They Mean',dur:'15 min',type:'video',content:`<h3>When the Trend Ends</h3><p>A trendline break occurs when price closes convincingly beyond the trendline — signalling a potential trend change. The same rule applies: you need a strong candle body close, not just a wick through the line.</p><div class="hl">After a valid trendline break, wait for price to come back and retest the broken trendline from the other side. If it holds as new resistance (in an uptrend break), you have a high-probability trade in the new direction with excellent RR.</div>`},
+    {id:'l18',title:'Putting It All Together — Full Strategy Review',dur:'25 min',type:'reading',content:`<h3>The BiddyFX Framework — Complete</h3><p>You now have all three components. Here's how they work together:</p><p><strong>Step 1 — Trend:</strong> Start on the Daily. Draw your trendline. Identify overall direction. Only trade in the direction of the daily trend as a beginner.</p><p><strong>Step 2 — Key Levels:</strong> Mark major S&R zones on Daily and 4H. Note where they overlap with your trendline — these are confluence zones.</p><p><strong>Step 3 — Wait:</strong> Price pulls back to your trendline or S&R zone. Patience. Do not rush.</p><div class="hl">The entire strategy in one sentence: Trade breakouts from key S&R zones in the direction of the trendline, with confirmation, proper risk management, and minimum 1:2 risk:reward.</div><p><strong>Step 4 — Confirmation:</strong> Pin bar, engulfing, or inside bar at your zone. This is your entry trigger.</p><p><strong>Step 5 — Risk Management:</strong> Use the position calculator. Risk 1–2% max per trade. Stop beyond the zone. TP at next key level. Walk away and let it work.</p><p><strong>Step 6 — Journal & Review:</strong> Record every trade. Review weekly. The difference between you and a funded trader is now discipline, consistency, and screen time. 🏆</p>`}
+  ]}
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let currentLesson = null;
+
+// ============================================================
+// AUTH
+// ============================================================
+window.addEventListener('load', () => {
+  const stored = localStorage.getItem('bfx_user');
+  if (stored) { currentUser = JSON.parse(stored); initDashboard(); }
+});
+
+function switchTab(t) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.auth-tab')[t === 'login' ? 0 : 1].classList.add('active');
+  document.getElementById(t + 'Form').classList.add('active');
+}
+
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  if (!email || !pass) { err.textContent = 'Please fill in both fields.'; return; }
+  const stored = localStorage.getItem('bfx_user');
+  if (!stored) { err.textContent = 'No account found. Please register.'; return; }
+  const u = JSON.parse(stored);
+  if (u.email !== email) { err.textContent = 'Email not found.'; return; }
+  if (u.password !== btoa(pass)) { err.textContent = 'Incorrect password.'; return; }
+  err.textContent = '';
+  currentUser = u;
+  u.lastLogin = new Date().toISOString();
+  localStorage.setItem('bfx_user', JSON.stringify(u));
+  initDashboard();
+}
+
+function handleRegister() {
+  const first = document.getElementById('regFirst').value.trim();
+  const last = document.getElementById('regLast').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const exp = document.getElementById('regExp').value;
+  const err = document.getElementById('regErr');
+  if (!first || !email || !pass || !exp) { err.textContent = 'Please fill in all fields.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Please enter a valid email.'; return; }
+  if (pass.length < 8) { err.textContent = 'Password must be at least 8 characters.'; return; }
+  const user = {
+    name: first + ' ' + last, firstName: first, lastName: last,
+    email, password: btoa(pass), exp, prog: 'Foundation (Free)',
+    joined: new Date().toISOString(), lastLogin: new Date().toISOString(),
+    progress: {}, streak: 1, activities: [], phone: ''
+  };
+  localStorage.setItem('bfx_user', JSON.stringify(user));
+  currentUser = user;
+  initDashboard();
+}
+
+function handleLogout() {
+  currentUser = null;
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+}
+
+// ============================================================
+// INIT DASHBOARD
+// ============================================================
+function initDashboard() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  const u = currentUser;
+  const initials = u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('sideAv').textContent = initials;
+  document.getElementById('sideName').textContent = u.name;
+  document.getElementById('sideTier').textContent = u.prog || 'Foundation';
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('pageTitle').innerHTML = g + ', <em>' + u.name.split(' ')[0] + '</em>';
+  buildOverview();
+  buildCourses();
+  buildProfile();
+  startSessions();
+  startClock();
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+function buildOverview() {
+  const u = currentUser;
+  const prog = u.progress || {};
+  let done = 0;
+  COURSES.forEach(m => m.lessons.forEach(l => { if (prog[l.id] === 'done') done++; }));
+  const total = COURSES.reduce((s, m) => s + m.lessons.length, 0);
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('ovLessons').textContent = done;
+  document.getElementById('ovPct').textContent = pct + '%';
+  document.getElementById('ovStreak').textContent = Math.floor(u.streak || 1);
+
+  // Progress bars
+  const pl = document.getElementById('progList');
+  pl.innerHTML = '';
+  COURSES.forEach(m => {
+    const mDone = m.lessons.filter(l => prog[l.id] === 'done').length;
+    const mPct = Math.round((mDone / m.lessons.length) * 100);
+    pl.innerHTML += `<div class="prog-row"><div class="prog-icon">${m.icon}</div><div class="prog-info"><div class="prog-name">${m.title}</div><div class="prog-track"><div class="prog-fill" style="width:${mPct}%"></div></div></div><div class="prog-pct">${mPct}%</div></div>`;
+  });
+
+  // Activity
+  const al = document.getElementById('actList');
+  const acts = u.activities || [];
+  if (acts.length > 0) {
+    al.innerHTML = '';
+    acts.slice(-5).reverse().forEach(a => {
+      al.innerHTML += `<div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>${a.title}</strong></div><div class="act-time">${a.time}</div></div>`;
+    });
+  }
+
+  // Streak
+  const sr = document.getElementById('streakRow');
+  const days = ['M','T','W','T','F','S','S'];
+  const today = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  sr.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const isToday = i === today;
+    const isDone = i < today && i < Math.floor(u.streak || 1);
+    sr.innerHTML += `<div class="streak-day ${isToday ? 'today' : isDone ? 'done' : ''}"><div class="streak-day-check">${isDone || isToday ? '✓' : ''}</div><div class="streak-day-label">${days[i]}</div></div>`;
+  }
+
+  // Next lesson
+  const nl = document.getElementById('nextLessonWidget');
+  let nextL = null, nextM = null;
+  outer: for (const m of COURSES) {
+    for (const l of m.lessons) {
+      if (prog[l.id] !== 'done') { nextL = l; nextM = m; break outer; }
+    }
+  }
+  if (nextL) {
+    nl.innerHTML = `<div class="next-lesson"><div class="nl-thumb">${nextM.icon}</div><div class="nl-info"><div class="nl-mod">${nextM.title}</div><div class="nl-title">${nextL.title}</div><div class="nl-dur">⏱ ${nextL.dur}</div><button class="btn-sm" onclick="openLesson('${nextM.id}','${nextL.id}')">Continue →</button></div></div>`;
+  } else {
+    nl.innerHTML = `<div style="text-align:center;padding:20px;"><div style="font-size:30px;margin-bottom:10px">🏆</div><div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--gold)">Course Complete!</div><div style="font-size:12px;color:var(--muted);margin-top:6px;">Upgrade to Pro to continue.</div><a href="index.html#programs" class="btn-sm" style="margin-top:12px;display:inline-block;">Upgrade →</a></div>`;
+  }
+}
+
+// ============================================================
+// COURSES
+// ============================================================
+function buildCourses() {
+  const prog = currentUser.progress || {};
+  const cc = document.getElementById('courseContent');
+  cc.innerHTML = '';
+  COURSES.forEach(m => {
+    const mDone = m.lessons.filter(l => prog[l.id] === 'done').length;
+    const mPct = Math.round((mDone / m.lessons.length) * 100);
+    let lessonsHTML = '';
+    m.lessons.forEach((l, idx) => {
+      const done = prog[l.id] === 'done';
+      const isCurrent = !done && m.lessons.slice(0, idx).every(pl => prog[pl.id] === 'done');
+      const typeClass = { video: 'lt-v', reading: 'lt-r', quiz: 'lt-q' }[l.type] || 'lt-v';
+      const typeLabel = { video: '📹 Video', reading: '📄 Reading', quiz: '✏️ Quiz' }[l.type];
+      const clickable = done || isCurrent;
+      lessonsHTML += `<div class="lesson-card ${done ? 'done' : isCurrent ? 'current' : 'locked'}" onclick="${clickable ? `openLesson('${m.id}','${l.id}')` : ''}">
+        <div class="lesson-status">${done ? '✅' : isCurrent ? '▶️' : '🔒'}</div>
+        <div class="lesson-num">LESSON ${idx + 1}</div>
+        <div class="lesson-title">${l.title}</div>
+        <div class="lesson-dur">⏱ ${l.dur}</div>
+        <span class="lesson-type-tag ${typeClass}">${typeLabel}</span>
+      </div>`;
+    });
+    cc.innerHTML += `<div class="module-section">
+      <div class="module-header">
+        <div class="module-icon">${m.icon}</div>
+        <div><div class="module-title">${m.title}</div><div class="module-meta">${m.lessons.length} lessons · Free Access</div></div>
+        <div class="module-pct">${mPct}%</div>
+      </div>
+      <div class="lessons-grid">${lessonsHTML}</div>
+    </div>`;
+  });
+  // Locked Pro section
+  cc.innerHTML += `<div class="pro-locked-section">
+    <div class="module-header">
+      <div class="module-icon">🔐</div>
+      <div><div class="module-title" style="color:var(--muted)">Advanced Modules — Pro & Apex</div><div class="module-meta">SMC · ICT Concepts · Prop Firm Prep · Live Sessions</div></div>
+      <span style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.18);color:var(--gold);font-family:'Space Mono',monospace;font-size:8px;padding:3px 10px;text-transform:uppercase;letter-spacing:.1em;margin-left:auto;">Pro Required</span>
+    </div>
+    <div class="lessons-grid">
+      ${['Smart Money Concepts (SMC)','ICT Inner Circle Concepts','Order Flow & Liquidity','Prop Firm Challenge Mastery','Advanced Risk Management','Trading Psychology Mastery'].map(t =>
+        `<div class="lesson-card locked"><div class="lesson-status">🔒</div><div class="lesson-title">${t}</div><span class="locked-tag">Pro Only</span></div>`
+      ).join('')}
+    </div>
+    <div class="pro-locked-banner">
+      <div class="plb-text"><strong>Unlock all advanced content</strong> — upgrade to Pro Trader for live sessions, signals, and the full system.</div>
+      <a href="index.html#programs" class="btn-sm">Upgrade Now →</a>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// LESSON VIEWER
+// ============================================================
+function openLesson(moduleId, lessonId) {
+  const m = COURSES.find(c => c.id === moduleId);
+  const l = m?.lessons.find(x => x.id === lessonId);
+  if (!l) return;
+  currentLesson = { moduleId, lessonId };
+  document.getElementById('lvMod').textContent = m.title;
+  document.getElementById('lvTitle').textContent = l.title;
+  document.getElementById('lvDur').textContent = '⏱ ' + l.dur;
+  document.getElementById('lvType').textContent = { video: '📹 Video', reading: '📄 Reading', quiz: '✏️ Quiz' }[l.type];
+  document.getElementById('lvContent').innerHTML = l.content;
+  const prog = currentUser.progress || {};
+  const done = prog[lessonId] === 'done';
+  const btn = document.getElementById('lvBtn');
+  btn.textContent = done ? '✓ Completed' : '✓ Mark as Complete';
+  btn.className = 'lv-complete-btn' + (done ? ' done' : '');
+  updateLvProgress();
+  document.getElementById('lessonViewer').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  window.scrollTo(0, 0);
+}
+
+function closeLesson() {
+  document.getElementById('lessonViewer').style.display = 'none';
+  document.body.style.overflow = '';
+  currentLesson = null;
+  buildCourses();
+  buildOverview();
+}
+
+function markComplete() {
+  if (!currentLesson) return;
+  const btn = document.getElementById('lvBtn');
+  if (btn.classList.contains('done')) return;
+  const u = currentUser;
+  if (!u.progress) u.progress = {};
+  u.progress[currentLesson.lessonId] = 'done';
+  if (!u.activities) u.activities = [];
+  const m = COURSES.find(c => c.id === currentLesson.moduleId);
+  const l = m?.lessons.find(x => x.id === currentLesson.lessonId);
+  u.activities.push({ title: 'Completed: ' + l?.title, time: 'Just now' });
+  u.streak = (u.streak || 1) + 0.2;
+  localStorage.setItem('bfx_user', JSON.stringify(u));
+  btn.textContent = '✓ Completed';
+  btn.classList.add('done');
+  updateLvProgress();
+}
+
+function updateLvProgress() {
+  const prog = currentUser.progress || {};
+  const all = COURSES.reduce((a, c) => [...a, ...c.lessons], []);
+  const done = all.filter(x => prog[x.id] === 'done').length;
+  const pct = Math.round((done / all.length) * 100);
+  document.getElementById('lvFill').style.width = pct + '%';
+  document.getElementById('lvPctText').textContent = pct + '% complete';
+}
+
+// ============================================================
+// CALCULATOR
+// ============================================================
+function calcPos() {
+  const bal = parseFloat(document.getElementById('cBal').value) || 0;
+  const risk = parseFloat(document.getElementById('cRisk').value) || 0;
+  const sl = parseFloat(document.getElementById('cSL').value) || 0;
+  const tp = parseFloat(document.getElementById('cTP').value) || 0;
+  const pair = document.getElementById('cPair').value;
+  if (!bal || !risk || !sl) return;
+  const rAmt = (bal * risk) / 100;
+  const pipVal = pair === 'jpy' ? 6.7 : pair === 'gold' ? 1 : 10;
+  const lots = rAmt / (sl * pipVal);
+  const units = Math.round(lots * (pair === 'gold' ? 100 : 100000));
+  const profit = tp > 0 ? (tp / sl) * rAmt : 0;
+  const rr = tp > 0 ? tp / sl : 0;
+  const s = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  s('crRisk', '$' + rAmt.toFixed(2));
+  s('crLot', lots.toFixed(4) + ' lots');
+  s('crUnits', units.toLocaleString() + ' units');
+  s('crProfit', profit > 0 ? '$' + profit.toFixed(2) : 'Enter TP');
+  s('crRR', rr > 0 ? '1 : ' + rr.toFixed(2) : '—');
+  const a = document.getElementById('crAssess');
+  if (rr > 0) {
+    if (rr >= 3) { a.textContent = '🔥 Excellent'; a.style.color = 'var(--green)'; }
+    else if (rr >= 2) { a.textContent = '✓ Good'; a.style.color = 'var(--gold)'; }
+    else if (rr >= 1) { a.textContent = '⚠ Acceptable'; a.style.color = '#aaa'; }
+    else { a.textContent = '✗ Poor — skip'; a.style.color = 'var(--red)'; }
+  } else { a.textContent = 'Enter TP'; a.style.color = 'var(--muted)'; }
+  const f = document.getElementById('rFill');
+  f.style.width = Math.min(100, (risk / 5) * 100) + '%';
+  f.style.background = risk <= 1 ? 'var(--green)' : risk <= 2 ? 'var(--gold)' : 'var(--red)';
+}
+['cBal','cRisk','cSL','cTP'].forEach(id => document.getElementById(id)?.addEventListener('input', calcPos));
+document.getElementById('cPair')?.addEventListener('change', calcPos);
+
+// ============================================================
+// SESSIONS
+// ============================================================
+function startSessions() { updateSessions(); setInterval(updateSessions, 1000); }
+
+function updateSessions() {
+  const now = new Date();
+  const utcMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const wknd = now.getUTCDay() === 0 || now.getUTCDay() === 6;
+  function inRange(s, e) {
+    if (wknd) return false;
+    return s < e ? utcMin >= s && utcMin < e : utcMin >= s || utcMin < e;
+  }
+  function setSession(cardId, statusId, barId, active, pct) {
+    const c = document.getElementById(cardId); if (!c) return;
+    c.className = 'sess-card' + (active ? ' active-sess' : '');
+    document.getElementById(statusId).textContent = active ? 'LIVE' : 'CLOSED';
+    document.getElementById(barId).style.width = active ? Math.max(2, pct) + '%' : '0%';
+  }
+  const syd = inRange(21 * 60, 6 * 60);
+  const tok = inRange(0, 9 * 60);
+  const lon = inRange(8 * 60, 17 * 60);
+  const ny = inRange(13 * 60, 22 * 60);
+  const sydPct = syd ? (utcMin >= 21 * 60 ? (utcMin - 21 * 60) / (9 * 60) : (utcMin + 180) / (9 * 60)) * 100 : 0;
+  setSession('sSydney', 'sSydneyS', 'sSydneyB', syd, sydPct);
+  setSession('sTokyo', 'sTokyoS', 'sTokyoB', tok, (utcMin / (9 * 60)) * 100);
+  setSession('sLondon', 'sLondonS', 'sLondonB', lon, ((utcMin - 8 * 60) / (9 * 60)) * 100);
+  setSession('sNY', 'sNYS', 'sNYB', ny, ((utcMin - 13 * 60) / (9 * 60)) * 100);
+  const fmt = tz => new Date().toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: true });
+  const el = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+  el('sSydneyL', 'Sydney: ' + fmt('Australia/Sydney'));
+  el('sTokyoL', 'Tokyo: ' + fmt('Asia/Tokyo'));
+  el('sLondonL', 'London: ' + fmt('Europe/London'));
+  el('sNYL', 'New York: ' + fmt('America/New_York'));
+  const active = [syd && 'Sydney', tok && 'Tokyo', lon && 'London', ny && 'New York'].filter(Boolean);
+  el('sessionLabel', active.length ? active.join(' + ') + ' Open' : 'Markets Closed');
+  el('ovSess', active.length ? active[0] : 'Closed');
+  el('ovSessSub', active.length ? 'Session active' : 'No active session');
+}
+
+function startClock() {
+  function tick() {
+    const n = new Date();
+    const el = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+    el('localTime', n.toLocaleTimeString());
+    const H = n.getUTCHours(), M = n.getUTCMinutes(), S = n.getUTCSeconds();
+    el('utcTime', `${String(H).padStart(2,'0')}:${String(M).padStart(2,'0')}:${String(S).padStart(2,'0')} UTC`);
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function buildProfile() {
+  const u = currentUser;
+  if (!u) return;
+  const initials = u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const el = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t || '—'; };
+  document.getElementById('profAv').textContent = initials;
+  el('profName', u.name); el('profEmail', u.email);
+  el('profTier', u.prog || 'Foundation · Free');
+  el('profJoined', new Date(u.joined).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  const prog = u.progress || {};
+  let done = 0; COURSES.forEach(m => m.lessons.forEach(l => { if (prog[l.id] === 'done') done++; }));
+  const total = COURSES.reduce((s, m) => s + m.lessons.length, 0);
+  el('profLessons', done + ' of ' + total);
+  el('profProgress', Math.round((done / total) * 100) + '%');
+  el('profExp', u.exp || '—');
+  const parts = u.name.split(' ');
+  const fi = document.getElementById('pfFirst'); if (fi) fi.value = parts[0] || '';
+  const fl = document.getElementById('pfLast'); if (fl) fl.value = parts.slice(1).join(' ') || '';
+  const fe = document.getElementById('pfEmail'); if (fe) fe.value = u.email || '';
+  const fp = document.getElementById('pfPhone'); if (fp) fp.value = u.phone || '';
+  const fx = document.getElementById('pfExp'); if (fx) fx.value = u.exp || '';
+}
+
+function saveProfile() {
+  const u = currentUser;
+  const first = document.getElementById('pfFirst').value.trim();
+  const last = document.getElementById('pfLast').value.trim();
+  const email = document.getElementById('pfEmail').value.trim();
+  const phone = document.getElementById('pfPhone').value.trim();
+  const exp = document.getElementById('pfExp').value;
+  const pass = document.getElementById('pfPass').value;
+  if (!first || !email) return;
+  u.name = first + ' ' + last; u.firstName = first; u.lastName = last;
+  u.email = email; u.phone = phone; u.exp = exp;
+  if (pass.length >= 8) u.password = btoa(pass);
+  localStorage.setItem('bfx_user', JSON.stringify(u));
+  currentUser = u;
+  buildProfile();
+  document.getElementById('sideAv').textContent = u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('sideName').textContent = u.name;
+  const saved = document.getElementById('pfSaved');
+  if (saved) { saved.style.display = 'inline'; setTimeout(() => saved.style.display = 'none', 2500); }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const allNavItems = document.querySelectorAll('.nav-item');
+  allNavItems.forEach(n => { if (n.textContent.toLowerCase().includes(id === 'overview' ? 'overview' : id === 'courses' ? 'courses' : id === 'calculator' ? 'calculator' : id === 'sessions' ? 'sessions' : 'profile')) n.classList.add('active'); });
+  const titles = { overview: '', courses: 'My Courses', calculator: 'Position Calculator', sessions: 'Trading Sessions', profile: 'Profile & Settings' };
+  const pt = document.getElementById('pageTitle');
+  if (id === 'overview' && currentUser) {
+    const h = new Date().getHours();
+    const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    pt.innerHTML = g + ', <em>' + currentUser.name.split(' ')[0] + '</em>';
+  } else { pt.textContent = titles[id] || id; }
+  if (id === 'courses') buildCourses();
+  if (id === 'profile') buildProfile();
+  if (id === 'overview') buildOverview();
+  window.scrollTo(0, 0);
+}
+
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+</script>
+</body>
+</html>
