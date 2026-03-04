@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiddyFX — Control Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ============================================================
+// 🔥 PASTE YOUR FIREBASE CONFIG HERE
+// Go to console.firebase.google.com → your project →
+// Project Settings → Your apps → Web app → Config
+// ============================================================
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_API_KEY",
+  authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+  projectId: "PASTE_YOUR_PROJECT_ID",
+  storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+  appId: "PASTE_YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window._db = db;
+window._firebase = { collection, getDocs, doc, updateDoc, onSnapshot, query, orderBy };
+window._firebaseReady = true;
+window.dispatchEvent(new Event('firebaseReady'));
+</script>
+
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;
+  --glow:rgba(201,168,76,.1);--black:#000;--deep:#030303;
+  --card:#0A0A0A;--border:#1A1A1A;--border2:#252525;
+  --green:#00C896;--red:#FF4444;--blue:#4A9EFF;--orange:#FF8C00;
+  --text:#e8e0d0;--muted:#555;--dim:#222;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--deep);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh;}
+
+/* ============================================================ LOGIN GATE */
+#loginGate{
+  position:fixed;inset:0;background:var(--deep);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.lg-bg{position:absolute;inset:0;background:radial-gradient(ellipse 50% 50% at 50% 42%,rgba(201,168,76,.05),transparent 70%);}
+.lg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.02) 1px,transparent 1px);background-size:52px 52px;}
+.lg-box{position:relative;z-index:2;width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);padding:44px 36px;}
+.lg-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);text-align:center;margin-bottom:4px;}
+.lg-logo em{font-style:italic;color:#fff;}
+.lg-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-align:center;letter-spacing:.2em;text-transform:uppercase;margin-bottom:32px;}
+.lg-label{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.lg-input{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:13px 14px;outline:none;transition:border-color .3s;margin-bottom:14px;}
+.lg-input:focus{border-color:var(--gold);}
+.lg-btn{width:100%;background:var(--gold);color:var(--black);padding:15px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;}
+.lg-btn:hover{background:var(--gold-light);}
+.lg-err{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;margin-top:10px;min-height:16px;text-align:center;}
+.lg-warn{margin-top:18px;padding:11px 14px;background:rgba(255,68,68,.04);border:1px solid rgba(255,68,68,.12);font-family:'Space Mono',monospace;font-size:9px;color:#333;line-height:1.65;text-align:center;}
+
+/* ============================================================ ADMIN SHELL */
+#adminShell{display:none;}
+
+/* TOP BAR */
+.admin-top{background:#000;border-bottom:1px solid var(--border);padding:0 32px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.at-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--gold);}
+.at-logo em{font-style:italic;color:#fff;}
+.at-badge{font-family:'Space Mono',monospace;font-size:8px;color:var(--gold);background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.18);padding:3px 10px;letter-spacing:.14em;text-transform:uppercase;margin-left:12px;}
+.at-right{display:flex;align-items:center;gap:14px;}
+.at-sync{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.at-logout{background:none;border:1px solid var(--border);color:var(--muted);padding:7px 14px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s;}
+.at-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* MAIN */
+.admin-main{padding:32px;}
+.admin-inner{max-width:1400px;margin:0 auto;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--card);border:1px solid var(--border);padding:20px 18px;}
+.sc-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;}
+.sc-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1;}
+.sc-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);margin-top:5px;}
+.sc-total .sc-val{color:var(--gold);}
+.sc-foundation .sc-val{color:var(--muted);}
+.sc-pro .sc-val{color:var(--gold);}
+.sc-apex .sc-val{color:var(--blue);}
+.sc-active .sc-val{color:var(--green);}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.tb-search{background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border-color .3s;width:280px;}
+.tb-search:focus{border-color:var(--gold);}
+.tb-filter{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;cursor:pointer;transition:all .25s;}
+.tb-filter.active,.tb-filter:hover{border-color:var(--gold);color:var(--gold);background:var(--glow);}
+.tb-spacer{flex:1;}
+.tb-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.refresh-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:10px 14px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:6px;}
+.refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--border);overflow:hidden;}
+.table-head{display:grid;grid-template-columns:200px 1fr 120px 120px 100px 80px 80px 140px;gap:0;background:#000;border-bottom:1px solid var(--border);}
+.th{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;padding:13px 16px;}
+.table-body{}
+.student-row{display:grid;grid-template-columns:200px 1fr 120px 120px 100px 80px 80px 140px;gap:0;border-bottom:1px solid var(--border);transition:background .2s;align-items:center;}
+.student-row:last-child{border-bottom:none;}
+.student-row:hover{background:rgba(255,255,255,.015);}
+.td{padding:14px 16px;font-size:13px;}
+.td-name{display:flex;align-items:center;gap:9px;}
+.st-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--black);font-size:10px;flex-shrink:0;}
+.st-name-text{font-weight:700;color:var(--text);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st-joined{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);margin-top:1px;}
+.td-email{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tier-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border:1px solid;}
+.tier-foundation{color:var(--muted);border-color:var(--border2);}
+.tier-pro{color:var(--gold);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.05);}
+.tier-apex{color:var(--blue);border-color:rgba(74,158,255,.3);background:rgba(74,158,255,.05);}
+.tier-revoked{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.05);}
+.prog-mini{height:3px;background:var(--border2);margin-top:5px;width:100%;}
+.prog-mini-fill{height:100%;background:var(--gold);transition:width .4s;}
+.td-prog{min-width:0;}
+.prog-pct-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);}
+.prog-lessons{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim);margin-top:2px;}
+.last-login{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.wa-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:rgba(0,200,150,.07);border:1px solid rgba(0,200,150,.2);color:var(--green);font-size:14px;text-decoration:none;transition:all .25s;}
+.wa-btn:hover{background:rgba(0,200,150,.15);border-color:var(--green);}
+.action-btns{display:flex;gap:5px;}
+.up-btn,.dn-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border:none;cursor:pointer;transition:all .25s;}
+.up-btn{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.2);}
+.up-btn:hover{background:var(--gold);color:var(--black);}
+.dn-btn{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.18);}
+.dn-btn:hover{background:var(--red);color:#fff;}
+
+/* EMPTY STATE */
+.empty-state{padding:60px;text-align:center;}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--muted);margin-bottom:6px;}
+.empty-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);line-height:1.7;}
+
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:8000;align-items:center;justify-content:center;padding:20px;}
+#modal.open{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--border);max-width:500px;width:100%;padding:36px;position:relative;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:1px solid var(--border);color:var(--muted);width:30px;height:30px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;}
+.modal-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:22px;}
+.modal-info{background:#000;border:1px solid var(--border);padding:16px;margin-bottom:22px;}
+.mi-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.mi-row:last-child{border-bottom:none;}
+.mi-label{color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;}
+.mi-val{color:var(--text);font-weight:600;}
+.modal-label{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px;}
+.modal-select{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;padding:12px 13px;outline:none;appearance:none;margin-bottom:18px;transition:border-color .3s;}
+.modal-select:focus{border-color:var(--gold);}
+.modal-btns{display:flex;gap:10px;}
+.modal-save{flex:1;background:var(--gold);color:var(--black);padding:13px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;transition:all .3s;}
+.modal-save:hover{background:var(--gold-light);}
+.modal-cancel{flex:0 0 auto;background:none;border:1px solid var(--border);color:var(--muted);padding:13px 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s;}
+.modal-cancel:hover{border-color:var(--muted);color:var(--text);}
+.modal-wa{display:flex;gap:10px;margin-top:14px;}
+.modal-wa-btn{flex:1;background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.22);color:var(--green);padding:12px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;text-align:center;transition:all .3s;}
+.modal-wa-btn:hover{background:rgba(0,200,150,.18);}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--gold);color:var(--gold);font-family:'Space Mono',monospace;font-size:11px;padding:13px 20px;letter-spacing:.1em;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:9999;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.error{border-color:var(--red);color:var(--red);}
+
+/* FIREBASE SETUP BANNER */
+#setupBanner{background:rgba(255,140,0,.06);border:1px solid rgba(255,140,0,.25);padding:16px 20px;margin-bottom:24px;display:none;}
+.sb-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px;}
+.sb-text{font-size:13px;color:#666;line-height:1.65;}
+.sb-text code{background:#111;border:1px solid var(--border);padding:2px 7px;font-family:'Space Mono',monospace;font-size:11px;color:var(--orange);}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MOBILE */
+@media(max-width:1100px){
+  .table-head,.student-row{grid-template-columns:160px 1fr 100px 90px 80px 0 80px 120px;}
+  .th:nth-child(6),.td:nth-child(6){display:none;}
+}
+@media(max-width:768px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .table-head{display:none;}
+  .student-row{grid-template-columns:1fr;padding:16px;gap:8px;}
+  .td{padding:0;}
+  .admin-main{padding:16px;}
+  .toolbar{gap:8px;}
+  .tb-search{width:100%;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ LOGIN GATE -->
+<div id="loginGate">
+  <div class="lg-bg"></div>
+  <div class="lg-grid"></div>
+  <div class="lg-box">
+    <div class="lg-logo">Biddy<em>FX</em></div>
+    <div class="lg-sub">Admin Control Panel</div>
+    <label class="lg-label">Admin Password</label>
+    <input type="password" class="lg-input" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkLogin()">
+    <button class="lg-btn" onclick="checkLogin()">Access Panel →</button>
+    <div class="lg-err" id="loginErr"></div>
+    <div class="lg-warn">⚠ This panel is for BiddyFX administrators only.<br>Unauthorised access attempts are logged.</div>
+  </div>
+</div>
+
+<!-- ============================================================ ADMIN SHELL -->
+<div id="adminShell">
+
+  <!-- TOP BAR -->
+  <div class="admin-top">
+    <div style="display:flex;align-items:center;gap:0;">
+      <div class="at-logo">Biddy<em>FX</em></div>
+      <span class="at-badge">Admin Panel</span>
+    </div>
+    <div class="at-right">
+      <div class="at-sync"><div class="sync-dot"></div><span id="syncStatus">Connected</span></div>
+      <button class="at-logout" onclick="adminLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+    <div class="admin-inner">
+
+      <!-- FIREBASE SETUP BANNER (shown if not configured) -->
+      <div id="setupBanner">
+        <div class="sb-title">⚙ Firebase Setup Required</div>
+        <div class="sb-text">Open <code>bfx-admin.html</code> and replace the placeholder values in the <code>firebaseConfig</code> object at the top of the file with your actual Firebase project credentials. See the setup guide below.</div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card sc-total"><div class="sc-label">Total Students</div><div class="sc-val" id="statTotal">—</div><div class="sc-sub">All registered</div></div>
+        <div class="stat-card sc-foundation"><div class="sc-label">Foundation</div><div class="sc-val" id="statFoundation">—</div><div class="sc-sub">Free tier</div></div>
+        <div class="stat-card sc-pro"><div class="sc-label">Pro Trader</div><div class="sc-val" id="statPro">—</div><div class="sc-sub">Paid — Pro</div></div>
+        <div class="stat-card sc-apex"><div class="sc-label">Apex / Funded</div><div class="sc-val" id="statApex">—</div><div class="sc-sub">Paid — Apex</div></div>
+        <div class="stat-card sc-active"><div class="sc-label">Active (7 days)</div><div class="sc-val" id="statActive">—</div><div class="sc-sub">Recently logged in</div></div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <input type="text" class="tb-search" id="searchInput" placeholder="Search by name or email..." oninput="renderTable()">
+        <button class="tb-filter active" onclick="setFilter('all',this)">All</button>
+        <button class="tb-filter" onclick="setFilter('foundation',this)">Foundation</button>
+        <button class="tb-filter" onclick="setFilter('pro',this)">Pro</button>
+        <button class="tb-filter" onclick="setFilter('apex',this)">Apex</button>
+        <button class="tb-filter" onclick="setFilter('revoked',this)">Revoked</button>
+        <div class="tb-spacer"></div>
+        <span class="tb-count" id="tbCount">— students</span>
+        <button class="refresh-btn" onclick="loadStudents()">↻ Refresh</button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <div class="table-head">
+          <div class="th">Student</div>
+          <div class="th">Email</div>
+          <div class="th">Interest</div>
+          <div class="th">Current Tier</div>
+          <div class="th">Progress</div>
+          <div class="th">Lessons</div>
+          <div class="th">Last Login</div>
+          <div class="th">Actions</div>
+        </div>
+        <div class="table-body" id="tableBody">
+          <div class="empty-state">
+            <div class="empty-icon">⏳</div>
+            <div class="empty-title">Loading students...</div>
+            <div class="empty-text">Connecting to Firebase database</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalName">Student</div>
+    <div class="modal-sub" id="modalSub">Manage access</div>
+    <div class="modal-info">
+      <div class="mi-row"><span class="mi-label">Email</span><span class="mi-val" id="mEmail">—</span></div>
+      <div class="mi-row"><span class="mi-label">Phone / WhatsApp</span><span class="mi-val" id="mPhone">—</span></div>
+      <div class="mi-row"><span class="mi-label">Experience</span><span class="mi-val" id="mExp">—</span></div>
+      <div class="mi-row"><span class="mi-label">Program Interest</span><span class="mi-val" id="mInterest">—</span></div>
+      <div class="mi-row"><span class="mi-label">Joined</span><span class="mi-val" id="mJoined">—</span></div>
+      <div class="mi-row"><span class="mi-label">Last Login</span><span class="mi-val" id="mLastLogin">—</span></div>
+      <div class="mi-row"><span class="mi-label">Lessons Completed</span><span class="mi-val" id="mLessons">—</span></div>
+      <div class="mi-row"><span class="mi-label">Foundation Progress</span><span class="mi-val" id="mProgress">—</span></div>
+    </div>
+    <label class="modal-label">Access Tier</label>
+    <select class="modal-select" id="modalTierSelect">
+      <option value="Foundation (Free)">Foundation (Free)</option>
+      <option value="Pro Trader">Pro Trader</option>
+      <option value="Apex / Funded">Apex / Funded</option>
+      <option value="Revoked">Revoked — No Access</option>
+    </select>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveTier()">Save & Upgrade →</button>
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+    <div class="modal-wa">
+      <a href="#" id="modalWaBtn" target="_blank" class="modal-wa-btn">📱 WhatsApp Student →</a>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// 🔐 ADMIN PASSWORD — CHANGE THIS TO YOUR OWN SECRET PASSWORD
+// ============================================================
+const ADMIN_PASSWORD = 'biddyfx2025admin';
+
+// ============================================================
+// STATE
+// ============================================================
+let allStudents = [];
+let currentFilter = 'all';
+let currentStudentId = null;
+let firebaseReady = false;
+
+// ============================================================
+// LOGIN
+// ============================================================
+function checkLogin() {
+  const pass = document.getElementById('adminPass').value;
+  const err = document.getElementById('loginErr');
+  if (!pass) { err.textContent = 'Enter the admin password.'; return; }
+  if (pass !== ADMIN_PASSWORD) {
+    err.textContent = 'Incorrect password. Access denied.';
+    document.getElementById('adminPass').value = '';
+    return;
+  }
+  sessionStorage.setItem('bfx_admin', '1');
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('adminShell').style.display = 'block';
+  initAdmin();
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('bfx_admin');
+  location.reload();
+}
+
+// Auto-login if already authenticated this session
+if (sessionStorage.getItem('bfx_admin') === '1') {
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('adminShell').style.display = 'block';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function initAdmin() {
+  // Check Firebase config
+  const configKeys = ['apiKey','authDomain','projectId'];
+  const isConfigured = window._firebaseReady;
+
+  if (!isConfigured) {
+    window.addEventListener('firebaseReady', () => { loadStudents(); }, { once: true });
+  } else {
+    loadStudents();
+  }
+
+  // Check if Firebase is using placeholder values
+  setTimeout(() => {
+    if (document.querySelector('script[type="module"]')) {
+      const scriptContent = document.querySelector('script[type="module"]').textContent;
+      if (scriptContent.includes('PASTE_YOUR_API_KEY')) {
+        document.getElementById('setupBanner').style.display = 'block';
+        document.getElementById('syncStatus').textContent = 'Not configured';
+        document.querySelector('.sync-dot').style.background = 'var(--orange)';
+        showDemoMode();
+      }
+    }
+  }, 500);
+}
+
+// ============================================================
+// FIREBASE LOAD
+// ============================================================
+async function loadStudents() {
+  if (!window._db) { showDemoMode(); return; }
+  try {
+    const { collection, getDocs, query, orderBy } = window._firebase;
+    const db = window._db;
+    const q = query(collection(db, 'students'), orderBy('joined', 'desc'));
+    const snapshot = await getDocs(q);
+    allStudents = [];
+    snapshot.forEach(d => { allStudents.push({ id: d.id, ...d.data() }); });
+    updateStats();
+    renderTable();
+    document.getElementById('syncStatus').textContent = 'Live · ' + allStudents.length + ' students';
+    showToast('✓ ' + allStudents.length + ' students loaded');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('syncStatus').textContent = 'Connection error';
+    document.querySelector('.sync-dot').style.background = 'var(--red)';
+    showToast('Firebase error: ' + e.message, true);
+    showDemoMode();
+  }
+}
+
+// ============================================================
+// DEMO MODE (when Firebase not configured)
+// ============================================================
+function showDemoMode() {
+  allStudents = [
+    {id:'demo1',name:'Ade Johnson',email:'ade@example.com',phone:'+234 801 234 5678',exp:'1–3 years',prog:'Foundation (Free)',progInterest:'Pro Trader',joined:new Date(Date.now()-7*86400000).toISOString(),lastLogin:new Date(Date.now()-86400000).toISOString(),progress:{l1:'done',l2:'done',l3:'done',l4:'done',l5:'done',l6:'done'},streak:7,activities:[]},
+    {id:'demo2',name:'Fatima Kurawa',email:'fatima@example.com',phone:'+234 802 345 6789',exp:'Less than 6 months',prog:'Pro Trader',progInterest:'Pro Trader',joined:new Date(Date.now()-14*86400000).toISOString(),lastLogin:new Date(Date.now()-3600000).toISOString(),progress:{l1:'done',l2:'done',l3:'done',l4:'done',l5:'done',l6:'done',l7:'done',l8:'done',l9:'done',l10:'done',p1l1:'done',p1l2:'done',p1l3:'done'},streak:14,activities:[]},
+    {id:'demo3',name:'Tunde Okafor',email:'tunde@example.com',phone:'+234 803 456 7890',exp:'3+ years',prog:'Apex / Funded',progInterest:'Apex / Funded',joined:new Date(Date.now()-30*86400000).toISOString(),lastLogin:new Date(Date.now()-7200000).toISOString(),progress:{l1:'done',l2:'done',l3:'done',l4:'done',l5:'done',l6:'done',l7:'done',l8:'done',l9:'done',l10:'done',l11:'done',l12:'done',l13:'done',l14:'done',l15:'done',l16:'done',l17:'done',l18:'done'},streak:21,activities:[]},
+    {id:'demo4',name:'Ngozi Eze',email:'ngozi@example.com',phone:'',exp:'Complete beginner',prog:'Foundation (Free)',progInterest:'Foundation (Free)',joined:new Date(Date.now()-2*86400000).toISOString(),lastLogin:new Date(Date.now()-2*86400000).toISOString(),progress:{},streak:1,activities:[]},
+    {id:'demo5',name:'Emeka Dike',email:'emeka@example.com',phone:'+234 805 678 9012',exp:'6 months – 1 year',prog:'Foundation (Free)',progInterest:'Apex / Funded',joined:new Date(Date.now()-5*86400000).toISOString(),lastLogin:new Date(Date.now()-5*86400000).toISOString(),progress:{l1:'done',l2:'done'},streak:2,activities:[]},
+  ];
+  updateStats();
+  renderTable();
+  showToast('Demo mode — configure Firebase to see real students', true);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  const total = allStudents.length;
+  const foundation = allStudents.filter(s => (s.prog||'').toLowerCase().includes('foundation') || !s.prog).length;
+  const pro = allStudents.filter(s => (s.prog||'').toLowerCase().includes('pro')).length;
+  const apex = allStudents.filter(s => (s.prog||'').toLowerCase().includes('apex') || (s.prog||'').toLowerCase().includes('funded')).length;
+  const sevenDays = Date.now() - 7 * 86400000;
+  const active = allStudents.filter(s => s.lastLogin && new Date(s.lastLogin).getTime() > sevenDays).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statFoundation').textContent = foundation;
+  document.getElementById('statPro').textContent = pro;
+  document.getElementById('statApex').textContent = apex;
+  document.getElementById('statActive').textContent = active;
+}
+
+// ============================================================
+// TABLE
+// ============================================================
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.tb-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const search = (document.getElementById('searchInput').value || '').toLowerCase();
+  let filtered = allStudents.filter(s => {
+    const matchSearch = !search || s.name?.toLowerCase().includes(search) || s.email?.toLowerCase().includes(search);
+    const tier = (s.prog || '').toLowerCase();
+    const matchFilter =
+      currentFilter === 'all' ||
+      (currentFilter === 'foundation' && (tier.includes('foundation') || !tier)) ||
+      (currentFilter === 'pro' && tier.includes('pro')) ||
+      (currentFilter === 'apex' && (tier.includes('apex') || tier.includes('funded'))) ||
+      (currentFilter === 'revoked' && tier.includes('revoked'));
+    return matchSearch && matchFilter;
+  });
+
+  document.getElementById('tbCount').textContent = filtered.length + ' student' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    document.getElementById('tableBody').innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">No students found</div>
+      <div class="empty-text">Try adjusting your search or filter</div>
+    </div>`;
+    return;
+  }
+
+  const TOTAL_FREE_LESSONS = 18;
+  document.getElementById('tableBody').innerHTML = filtered.map(s => {
+    const initials = (s.name || 'NA').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    const prog = s.prog || 'Foundation (Free)';
+    const tier = prog.toLowerCase();
+    const tierClass = tier.includes('apex') || tier.includes('funded') ? 'tier-apex' : tier.includes('pro') ? 'tier-pro' : tier.includes('revoked') ? 'tier-revoked' : 'tier-foundation';
+    const done = Object.values(s.progress || {}).filter(v => v === 'done').length;
+    const pct = Math.min(100, Math.round((done / TOTAL_FREE_LESSONS) * 100));
+    const lastLogin = s.lastLogin ? timeAgo(s.lastLogin) : 'Never';
+    const phone = s.phone ? encodeURIComponent(s.phone.replace(/\s/g,'').replace(/^\+/,'')) : '';
+    const waPhone = s.phone ? s.phone.replace(/\s/g,'').replace(/^\+/,'') : '';
+    const interest = s.progInterest || s.prog || '—';
+    const joined = s.joined ? new Date(s.joined).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+
+    return `<div class="student-row">
+      <div class="td td-name">
+        <div class="st-av">${initials}</div>
+        <div>
+          <div class="st-name-text">${s.name || 'Unknown'}</div>
+          <div class="st-joined">Joined ${joined}</div>
+        </div>
+      </div>
+      <div class="td td-email">${s.email || '—'}</div>
+      <div class="td"><span class="tier-badge tier-foundation" style="font-size:7px;">${interest}</span></div>
+      <div class="td"><span class="tier-badge ${tierClass}">${prog}</span></div>
+      <div class="td td-prog">
+        <div class="prog-pct-text">${pct}%</div>
+        <div class="prog-mini"><div class="prog-mini-fill" style="width:${pct}%"></div></div>
+        <div class="prog-lessons">${done} lessons</div>
+      </div>
+      <div class="td"><span class="prog-pct-text">${done}</span></div>
+      <div class="td"><span class="last-login">${lastLogin}</span></div>
+      <div class="td">
+        <div class="action-btns">
+          ${waPhone ? `<a href="https://wa.me/${waPhone}?text=Hi%20${encodeURIComponent(s.name||'')}%2C%20this%20is%20BiddyFX%20Academy%21" target="_blank" class="wa-btn" title="WhatsApp">📱</a>` : ''}
+          <button class="up-btn" onclick="openModal('${s.id}')" title="Manage access">⚙ Manage</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(studentId) {
+  const s = allStudents.find(x => x.id === studentId);
+  if (!s) return;
+  currentStudentId = studentId;
+  const done = Object.values(s.progress || {}).filter(v => v === 'done').length;
+  const pct = Math.min(100, Math.round((done / 18) * 100));
+  document.getElementById('modalName').textContent = s.name || 'Unknown Student';
+  document.getElementById('modalSub').textContent = s.email || '';
+  document.getElementById('mEmail').textContent = s.email || '—';
+  document.getElementById('mPhone').textContent = s.phone || '—';
+  document.getElementById('mExp').textContent = s.exp || '—';
+  document.getElementById('mInterest').textContent = s.progInterest || s.prog || '—';
+  document.getElementById('mJoined').textContent = s.joined ? new Date(s.joined).toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '—';
+  document.getElementById('mLastLogin').textContent = s.lastLogin ? new Date(s.lastLogin).toLocaleString() : 'Never';
+  document.getElementById('mLessons').textContent = done + ' of 18 free lessons';
+  document.getElementById('mProgress').textContent = pct + '% Foundation complete';
+  const sel = document.getElementById('modalTierSelect');
+  const prog = s.prog || 'Foundation (Free)';
+  const matchOpt = [...sel.options].find(o => o.value === prog);
+  if (matchOpt) sel.value = prog;
+  else sel.value = 'Foundation (Free)';
+  const waPhone = s.phone ? s.phone.replace(/\s/g,'').replace(/^\+/,'') : '2347069479312';
+  document.getElementById('modalWaBtn').href = `https://wa.me/${waPhone}?text=Hi%20${encodeURIComponent(s.name||'')}%2C%20your%20BiddyFX%20Academy%20access%20has%20been%20updated!`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  currentStudentId = null;
+}
+
+async function saveTier() {
+  if (!currentStudentId) return;
+  const newTier = document.getElementById('modalTierSelect').value;
+  const s = allStudents.find(x => x.id === currentStudentId);
+  if (!s) return;
+
+  // Update local state immediately
+  s.prog = newTier;
+  updateStats();
+  renderTable();
+  closeModal();
+  showToast('✓ ' + s.name + ' upgraded to ' + newTier);
+
+  // Save to Firebase if available
+  if (window._db && !document.getElementById('setupBanner').style.display.includes('block')) {
+    try {
+      const { doc, updateDoc } = window._firebase;
+      await updateDoc(doc(window._db, 'students', currentStudentId), { prog: newTier });
+      showToast('✓ Saved to Firebase — ' + s.name + ' is now ' + newTier);
+    } catch(e) {
+      showToast('Local update done. Firebase save failed: ' + e.message, true);
+    }
+  }
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  const d = Math.floor(h / 24);
+  if (d < 7) return d + 'd ago';
+  return new Date(dateStr).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = '', 3500);
+}
+
+// Close modal on backdrop click
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+// Enter key on login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginGate').style.display !== 'none') checkLogin();
+});
+
+// Auto init if already logged in
+if (sessionStorage.getItem('bfx_admin') === '1') {
+  setTimeout(initAdmin, 100);
+}
+
+// Wait for Firebase then load if logged in
+window.addEventListener('firebaseReady', () => {
+  if (sessionStorage.getItem('bfx_admin') === '1') loadStudents();
+});
+</script>
+</body>
+</html>

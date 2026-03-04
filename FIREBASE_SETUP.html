@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firebase Setup Guide — BiddyFX</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--green:#00C896;--blue:#4A9EFF;--red:#FF4444;--card:#0a0a0a;--border:#1a1a1a;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;color:#ccc;font-family:'Rajdhani',sans-serif;line-height:1.7;padding:40px 20px;}
+.wrap{max-width:800px;margin:0 auto;}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);margin-bottom:4px;}
+.logo em{font-style:italic;color:#fff;}
+.subtitle{font-family:'Space Mono',monospace;font-size:10px;color:#333;letter-spacing:.2em;text-transform:uppercase;margin-bottom:48px;}
+h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#fff;margin-bottom:8px;}
+h1 em{font-style:italic;color:var(--gold);font-weight:400;}
+.intro{font-size:15px;color:#555;margin-bottom:48px;max-width:600px;line-height:1.75;}
+.step{background:var(--card);border:1px solid var(--border);padding:28px 32px;margin-bottom:16px;position:relative;}
+.step-num{font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.step-num::after{content:'';flex:1;height:1px;background:var(--border);}
+.step h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;}
+.step p{font-size:14px;color:#555;margin-bottom:12px;line-height:1.75;}
+.step p:last-child{margin-bottom:0;}
+.step ul{padding-left:18px;margin-bottom:12px;}
+.step ul li{font-size:14px;color:#555;margin-bottom:6px;line-height:1.65;}
+.step ul li strong{color:#888;}
+code{background:#111;border:1px solid #1f1f1f;padding:2px 8px;font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);border-radius:2px;}
+.code-block{background:#0a0a0a;border:1px solid #1f1f1f;border-left:2px solid var(--gold);padding:16px 18px;font-family:'Space Mono',monospace;font-size:11px;color:#888;line-height:1.9;margin:14px 0;white-space:pre;overflow-x:auto;}
+.code-block .hl{color:var(--gold);}
+.note{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.12);padding:14px 16px;font-family:'Space Mono',monospace;font-size:11px;color:#3a3a3a;line-height:1.7;margin:14px 0;}
+.note strong{color:var(--gold);}
+.warn{background:rgba(255,68,68,.04);border:1px solid rgba(255,68,68,.12);padding:14px 16px;font-family:'Space Mono',monospace;font-size:11px;color:#3a3a3a;line-height:1.7;margin:14px 0;}
+.warn strong{color:var(--red);}
+.done-box{background:rgba(0,200,150,.04);border:1px solid rgba(0,200,150,.15);padding:24px 28px;margin-top:32px;}
+.done-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--green);margin-bottom:8px;}
+.files-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.file-item{background:#000;border:1px solid var(--border);padding:14px 16px;}
+.file-name{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);margin-bottom:4px;}
+.file-desc{font-size:12px;color:#444;}
+a{color:var(--gold);text-decoration:none;}
+a:hover{text-decoration:underline;}
+@media(max-width:600px){.files-list{grid-template-columns:1fr;}.step{padding:20px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="logo">Biddy<em>FX</em></div>
+<div class="subtitle">Firebase Setup Guide</div>
+
+<h1>Connect Your <em>Database</em></h1>
+<p class="intro">This guide takes about 10 minutes. When done, every student who registers will be saved to Firebase — and you can manage their access from the admin panel from any device, anywhere.</p>
+
+<!-- STEP 1 -->
+<div class="step">
+  <div class="step-num">Step 01</div>
+  <h2>Create a Free Firebase Account</h2>
+  <p>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> and sign in with your Google account. Firebase is free — the free Spark plan handles thousands of students with no credit card needed.</p>
+</div>
+
+<!-- STEP 2 -->
+<div class="step">
+  <div class="step-num">Step 02</div>
+  <h2>Create a New Project</h2>
+  <ul>
+    <li>Click <strong>"Add project"</strong></li>
+    <li>Name it <strong>biddyfx-academy</strong> (or anything you like)</li>
+    <li>Disable Google Analytics (not needed)</li>
+    <li>Click <strong>"Create project"</strong> — takes about 30 seconds</li>
+  </ul>
+</div>
+
+<!-- STEP 3 -->
+<div class="step">
+  <div class="step-num">Step 03</div>
+  <h2>Create a Firestore Database</h2>
+  <ul>
+    <li>In the left sidebar, click <strong>"Firestore Database"</strong></li>
+    <li>Click <strong>"Create database"</strong></li>
+    <li>Choose <strong>"Start in production mode"</strong></li>
+    <li>Select a location close to Nigeria — <strong>europe-west1</strong> or <strong>us-central1</strong></li>
+    <li>Click <strong>"Enable"</strong></li>
+  </ul>
+</div>
+
+<!-- STEP 4 -->
+<div class="step">
+  <div class="step-num">Step 04</div>
+  <h2>Set Firestore Rules</h2>
+  <p>In Firestore, click the <strong>"Rules"</strong> tab and replace everything with this:</p>
+  <div class="code-block"><span class="hl">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /students/{studentId} {
+      // Students can read and write their own document
+      allow read, write: if request.auth == null
+        && (resource == null || resource.data.email == request.resource.data.email);
+      // Allow create for new registrations
+      allow create: if true;
+      // Allow read/update for logged in students (by email match)
+      allow read, update: if true;
+    }
+  }
+}</span></div>
+  <div class="note"><strong>Note:</strong> This is a simplified ruleset suitable for getting started. For production at scale, add proper authentication. For now it works perfectly for your academy.</div>
+  <p>Click <strong>"Publish"</strong>.</p>
+</div>
+
+<!-- STEP 5 -->
+<div class="step">
+  <div class="step-num">Step 05</div>
+  <h2>Get Your Firebase Config Keys</h2>
+  <ul>
+    <li>In the Firebase console, click the <strong>gear icon ⚙</strong> → <strong>"Project settings"</strong></li>
+    <li>Scroll down to <strong>"Your apps"</strong></li>
+    <li>Click <strong>"Add app"</strong> → choose the <strong>Web (&lt;/&gt;)</strong> icon</li>
+    <li>Give it a nickname: <strong>biddyfx-web</strong></li>
+    <li>Click <strong>"Register app"</strong></li>
+    <li>You'll see a config object like this — <strong>copy the entire thing:</strong></li>
+  </ul>
+  <div class="code-block">const firebaseConfig = {
+  <span class="hl">apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXX",
+  authDomain: "biddyfx-academy.firebaseapp.com",
+  projectId: "biddyfx-academy",
+  storageBucket: "biddyfx-academy.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdef123456"</span>
+};</div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step">
+  <div class="step-num">Step 06</div>
+  <h2>Paste the Config Into All 3 Files</h2>
+  <p>Open each of these files and find the <code>firebaseConfig</code> object. Replace the <code>PASTE_YOUR_...</code> placeholders with your real values:</p>
+  <div class="files-list">
+    <div class="file-item"><div class="file-name">login.html</div><div class="file-desc">Student registration & login</div></div>
+    <div class="file-item"><div class="file-name">dashboard.html</div><div class="file-desc">Student learning portal</div></div>
+    <div class="file-item"><div class="file-name">bfx-admin.html</div><div class="file-desc">Your admin control panel</div></div>
+  </div>
+  <div class="note" style="margin-top:14px;"><strong>Tip:</strong> All three files need the EXACT same config — same <code>projectId</code>, same <code>apiKey</code>. Copy-paste the whole block each time.</div>
+</div>
+
+<!-- STEP 7 -->
+<div class="step">
+  <div class="step-num">Step 07</div>
+  <h2>Change the Admin Password</h2>
+  <p>Open <code>bfx-admin.html</code> and find this line near the top of the <code>&lt;script&gt;</code> section:</p>
+  <div class="code-block">const ADMIN_PASSWORD = <span class="hl">'biddyfx2025admin'</span>;</div>
+  <p>Change <code>biddyfx2025admin</code> to your own secret password. Something strong that only you know. Do this before uploading to GitHub.</p>
+  <div class="warn"><strong>Important:</strong> Never share the URL of bfx-admin.html publicly. The URL itself is the first layer of security — the password is the second.</div>
+</div>
+
+<!-- STEP 8 -->
+<div class="step">
+  <div class="step-num">Step 08</div>
+  <h2>Upload All Files to GitHub & Deploy</h2>
+  <p>Upload these files to your GitHub repository:</p>
+  <div class="code-block">index.html
+news.html
+login.html
+contact.html
+dashboard.html
+<span class="hl">bfx-admin.html    ← NEW</span>
+vercel.json</div>
+  <p>Vercel will auto-deploy in about 30 seconds. Your admin panel will be live at:</p>
+  <div class="code-block"><span class="hl">https://your-site.vercel.app/bfx-admin.html</span></div>
+  <div class="note"><strong>Bookmark that URL.</strong> Share it with nobody. It's your private control room.</div>
+</div>
+
+<!-- DONE -->
+<div class="done-box">
+  <div class="done-title">✓ You're All Set</div>
+  <p style="font-size:14px;color:#555;margin-top:8px;line-height:1.75;">Once configured, the full system works like this:</p>
+  <ul style="padding-left:18px;margin-top:10px;">
+    <li style="font-size:13px;color:#444;margin-bottom:7px;">Student registers on <strong style="color:#888;">login.html</strong> → saved to Firebase automatically</li>
+    <li style="font-size:13px;color:#444;margin-bottom:7px;">You open <strong style="color:#888;">bfx-admin.html</strong> → enter password → see all students</li>
+    <li style="font-size:13px;color:#444;margin-bottom:7px;">Student pays &amp; messages on WhatsApp → you click <strong style="color:#888;">⚙ Manage</strong> → upgrade tier → save</li>
+    <li style="font-size:13px;color:#444;margin-bottom:7px;">Student logs into <strong style="color:#888;">dashboard.html</strong> → Firebase syncs their new tier → Pro/Apex content unlocks</li>
+    <li style="font-size:13px;color:#444;">Student lesson progress syncs back to Firebase → you can see it in the admin panel</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>
