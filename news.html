@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Intelligence — BiddyFX Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --gold:#C9A84C; --gold2:#F0D080; --gold3:rgba(201,168,76,.08); --gold4:rgba(201,168,76,.18);
+  --green:#00C896; --red:#EF4444; --blue:#3B82F6;
+  --bg:#060606; --bg2:#0A0A0A; --bg3:#0F0F0F; --bg4:#141414;
+  --border:#181818; --border2:#222; --border3:#2E2E2E;
+  --text:#E2D9C8; --text2:#888; --text3:#444; --text4:#2A2A2A;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); font-family:'Rajdhani',sans-serif; overflow-x:hidden; }
+
+/* ═══════════════════════════════════════════════════════
+   TICKER TAPE
+═══════════════════════════════════════════════════════ */
+.ticker-wrap { height:38px; background:#000; border-bottom:1px solid var(--border); overflow:hidden; }
+.ticker-wrap .tradingview-widget-container,
+.ticker-wrap .tradingview-widget-container__widget { height:38px !important; }
+
+/* ═══════════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════════ */
+nav {
+  position:sticky; top:0; z-index:500;
+  background:rgba(6,6,6,.97); border-bottom:1px solid var(--border);
+  backdrop-filter:blur(24px); padding:0 5vw;
+}
+.nav-inner { display:flex; align-items:center; justify-content:space-between; height:58px; gap:16px; }
+.logo { font-family:'Playfair Display',serif; font-size:20px; font-weight:900; color:var(--gold); text-decoration:none; letter-spacing:-.01em; }
+.logo em { font-style:italic; color:var(--text); }
+.nav-links { display:flex; gap:4px; align-items:center; }
+.nav-links a {
+  color:var(--text3); text-decoration:none; font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  padding:8px 12px; transition:color .2s;
+}
+.nav-links a:hover, .nav-links a.active { color:var(--gold); }
+.nav-cta {
+  background:var(--gold); color:#000 !important; font-weight:600 !important;
+  padding:8px 18px !important;
+}
+.nav-cta:hover { background:var(--gold2) !important; }
+.nav-toggle {
+  display:none; background:none; border:1px solid var(--border2);
+  color:var(--gold); width:38px; height:38px; font-size:16px; cursor:pointer;
+  align-items:center; justify-content:center; flex-shrink:0;
+}
+.nav-mobile {
+  display:none; flex-direction:column; background:var(--bg2);
+  border-top:1px solid var(--border); padding:12px 5vw;
+}
+.nav-mobile a {
+  color:var(--text3); text-decoration:none; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  padding:13px 0; border-bottom:1px solid var(--border); display:block; transition:color .2s;
+}
+.nav-mobile a:hover { color:var(--gold); }
+.nav-mobile.open { display:flex; }
+
+/* ═══════════════════════════════════════════════════════
+   MASTHEAD
+═══════════════════════════════════════════════════════ */
+.masthead {
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:64px 5vw 56px; position:relative; overflow:hidden;
+}
+.masthead::before {
+  content:''; position:absolute; top:0; right:0;
+  width:45%; height:100%;
+  background:radial-gradient(ellipse at 80% 50%, rgba(201,168,76,.05) 0%, transparent 70%);
+  pointer-events:none;
+}
+.masthead-inner { max-width:1300px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
+.mh-left {}
+.mh-eyebrow {
+  display:flex; align-items:center; gap:12px; margin-bottom:18px;
+}
+.mh-line { width:32px; height:1px; background:var(--gold); }
+.mh-label {
+  font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--gold);
+  letter-spacing:.24em; text-transform:uppercase;
+}
+.mh-date {
+  font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3);
+  letter-spacing:.12em; text-transform:uppercase; margin-left:auto;
+}
+.mh-title {
+  font-family:'Playfair Display',serif; font-size:clamp(40px,5vw,72px);
+  font-weight:900; color:#fff; line-height:1; margin-bottom:14px; letter-spacing:-.02em;
+}
+.mh-title em { font-style:italic; color:var(--gold); font-weight:400; }
+.mh-sub {
+  color:var(--text3); font-size:15px; line-height:1.7; max-width:480px;
+  font-family:'Rajdhani',sans-serif;
+}
+.mh-right { display:flex; flex-direction:column; gap:16px; }
+.mh-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.mh-stat {
+  background:var(--bg3); border:1px solid var(--border2); padding:16px 18px;
+  position:relative; overflow:hidden;
+}
+.mh-stat::after {
+  content:''; position:absolute; top:0; left:0; width:2px; height:100%;
+  background:var(--gold);
+}
+.mh-stat-lbl { font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--text3); letter-spacing:.16em; text-transform:uppercase; margin-bottom:6px; }
+.mh-stat-val { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; color:var(--text); }
+.mh-stat-val.up  { color:var(--green); }
+.mh-stat-val.dn  { color:var(--red); }
+.mh-stat-val.gold { color:var(--gold); }
+.mh-stat-chg { font-size:10px; color:var(--text3); margin-top:3px; }
+
+/* ═══════════════════════════════════════════════════════
+   FILTER BAR
+═══════════════════════════════════════════════════════ */
+.filter-bar {
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:0 5vw; position:sticky; top:58px; z-index:400;
+}
+.filter-inner { max-width:1300px; margin:0 auto; display:flex; align-items:center; gap:0; overflow-x:auto; scrollbar-width:none; }
+.filter-inner::-webkit-scrollbar { display:none; }
+.f-btn {
+  background:none; border:none; border-bottom:2px solid transparent;
+  font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text3); padding:16px 18px; cursor:pointer; transition:all .2s;
+  white-space:nowrap; flex-shrink:0;
+}
+.f-btn:hover { color:var(--text); }
+.f-btn.active { color:var(--gold); border-bottom-color:var(--gold); }
+.f-count {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:16px; height:16px; border-radius:50%; background:var(--gold3);
+  color:var(--gold); font-size:8px; margin-left:5px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN LAYOUT
+═══════════════════════════════════════════════════════ */
+.main-wrap { max-width:1300px; margin:0 auto; padding:0 5vw; }
+
+/* ═══════════════════════════════════════════════════════
+   FEATURED — HERO ARTICLE
+═══════════════════════════════════════════════════════ */
+.hero-section { padding:48px 0 0; }
+.hero-article {
+  display:grid; grid-template-columns:1fr 420px; gap:0;
+  border:1px solid var(--border2); overflow:hidden;
+  transition:border-color .3s;
+}
+.hero-article:hover { border-color:var(--gold4); }
+.hero-visual {
+  background:var(--bg3); position:relative; overflow:hidden; min-height:380px;
+  display:flex; align-items:flex-end;
+}
+.hero-visual-bg {
+  position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(201,168,76,.06) 0%, rgba(0,200,150,.04) 50%, rgba(239,68,68,.03) 100%);
+}
+/* Animated candlestick SVG decoration */
+.hero-candles {
+  position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center;
+  gap:6px; padding:30px 30px 0; opacity:.15;
+}
+.hc { display:flex; flex-direction:column; align-items:center; gap:0; }
+.hc-wick { width:1px; background:var(--gold); }
+.hc-body { width:12px; }
+.hc.up .hc-body { background:var(--green); }
+.hc.dn .hc-body { background:var(--red); }
+
+.hero-tag-wrap {
+  position:absolute; top:20px; left:20px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.hero-issue {
+  font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3);
+  letter-spacing:.2em; text-transform:uppercase;
+}
+.hero-tag {
+  display:inline-block; background:var(--gold); color:#000;
+  font-family:'IBM Plex Mono',monospace; font-size:8px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; padding:5px 12px;
+}
+
+.hero-gradient {
+  position:absolute; bottom:0; left:0; right:0; height:120px;
+  background:linear-gradient(transparent, var(--bg3));
+}
+
+.hero-content {
+  background:var(--bg3); padding:40px 40px 36px;
+  display:flex; flex-direction:column; justify-content:space-between; border-left:1px solid var(--border2);
+}
+.hero-meta {
+  display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+}
+.hm-cat {
+  font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em;
+  text-transform:uppercase; padding:4px 10px; border:1px solid;
+}
+.hm-cat.forex   { color:var(--gold);  border-color:rgba(201,168,76,.3);  background:rgba(201,168,76,.06);  }
+.hm-cat.metals  { color:#F59E0B; border-color:rgba(245,158,11,.3);  background:rgba(245,158,11,.05);  }
+.hm-cat.crypto  { color:var(--blue);  border-color:rgba(59,130,246,.3);  background:rgba(59,130,246,.05);  }
+.hm-cat.setups  { color:var(--green); border-color:rgba(0,200,150,.3);  background:rgba(0,200,150,.05);  }
+.hm-cat.macro   { color:var(--red);   border-color:rgba(239,68,68,.3);   background:rgba(239,68,68,.05);   }
+.hm-cat.edu     { color:#A78BFA; border-color:rgba(167,139,250,.3); background:rgba(167,139,250,.05); }
+.hm-date { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); letter-spacing:.1em; }
+.hm-read { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); margin-left:auto; }
+
+.hero-title {
+  font-family:'Playfair Display',serif; font-size:clamp(22px,2.5vw,34px);
+  font-weight:700; color:#fff; line-height:1.2; margin-bottom:18px; letter-spacing:-.01em;
+}
+.hero-excerpt {
+  color:var(--text3); font-size:14px; line-height:1.8; margin-bottom:28px; flex:1;
+}
+.hero-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.hero-author { display:flex; align-items:center; gap:10px; }
+.ha-avatar {
+  width:32px; height:32px; border-radius:50%; background:var(--gold4);
+  border:1px solid rgba(201,168,76,.3); display:flex; align-items:center; justify-content:center;
+  font-size:13px; flex-shrink:0;
+}
+.ha-name { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text2); letter-spacing:.08em; }
+.ha-role { font-size:9px; color:var(--text3); margin-top:1px; }
+.read-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--gold); color:#000; border:none;
+  font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  padding:11px 20px; cursor:pointer; transition:background .2s; text-decoration:none;
+}
+.read-btn:hover { background:var(--gold2); }
+.read-btn-ghost {
+  display:inline-flex; align-items:center; gap:8px;
+  color:var(--gold); border:1px solid rgba(201,168,76,.3);
+  font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase;
+  padding:11px 20px; cursor:pointer; transition:all .2s; text-decoration:none; background:none;
+}
+.read-btn-ghost:hover { background:var(--gold3); }
+
+/* ═══════════════════════════════════════════════════════
+   DIVIDER — MARKET PULSE
+═══════════════════════════════════════════════════════ */
+.pulse-bar {
+  margin:48px 0 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  background:var(--bg2); padding:0;
+}
+.pulse-inner { max-width:1300px; margin:0 auto; padding:0 5vw; }
+.pulse-label {
+  font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--gold);
+  letter-spacing:.22em; text-transform:uppercase; padding:14px 0 10px;
+}
+/* TradingView mini charts strip */
+.mini-charts { display:flex; gap:1px; background:var(--border); overflow:hidden; }
+.mini-chart-item { flex:1; background:var(--bg2); min-width:0; height:100px; position:relative; }
+.mini-chart-label {
+  position:absolute; top:6px; left:8px;
+  font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--text3);
+  letter-spacing:.1em; z-index:1; pointer-events:none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TWO-COLUMN GRID
+═══════════════════════════════════════════════════════ */
+.content-grid {
+  display:grid; grid-template-columns:1fr 320px; gap:36px; padding:48px 0 60px; align-items:start;
+}
+
+/* ── ARTICLE FEED ── */
+.feed-header {
+  display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px;
+}
+.feed-title {
+  font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--gold);
+  letter-spacing:.22em; text-transform:uppercase;
+}
+.feed-count { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); }
+
+/* Article card */
+.a-card {
+  background:var(--bg2); border:1px solid var(--border); display:grid;
+  grid-template-columns:1fr 100px; margin-bottom:1px;
+  transition:border-color .25s, background .25s; cursor:pointer;
+}
+.a-card:hover { border-color:var(--border3); background:var(--bg3); }
+.a-card.hidden { display:none; }
+
+.a-left { padding:22px 24px; }
+.a-meta { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.a-cat { font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.1em; text-transform:uppercase; padding:3px 9px; border:1px solid; }
+.a-cat.forex   { color:var(--gold);  border-color:rgba(201,168,76,.25); }
+.a-cat.metals  { color:#F59E0B; border-color:rgba(245,158,11,.25); }
+.a-cat.crypto  { color:var(--blue);  border-color:rgba(59,130,246,.25); }
+.a-cat.setups  { color:var(--green); border-color:rgba(0,200,150,.25); }
+.a-cat.macro   { color:var(--red);   border-color:rgba(239,68,68,.25); }
+.a-cat.edu     { color:#A78BFA; border-color:rgba(167,139,250,.25); }
+.a-date { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); }
+.a-read { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); margin-left:auto; }
+
+.a-title {
+  font-family:'Playfair Display',serif; font-size:18px; font-weight:700;
+  color:var(--text); line-height:1.3; margin-bottom:9px; letter-spacing:-.01em;
+  transition:color .2s;
+}
+.a-card:hover .a-title { color:#fff; }
+.a-excerpt { color:var(--text3); font-size:13px; line-height:1.7; margin-bottom:14px; }
+.a-footer { display:flex; align-items:center; gap:10px; }
+.a-author { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); }
+.a-sentiment {
+  margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:8px;
+  letter-spacing:.1em; text-transform:uppercase; padding:3px 9px;
+}
+.a-sentiment.bull { color:var(--green); background:rgba(0,200,150,.07); border:1px solid rgba(0,200,150,.15); }
+.a-sentiment.bear { color:var(--red);   background:rgba(239,68,68,.06);  border:1px solid rgba(239,68,68,.15); }
+.a-sentiment.neut { color:var(--text3); background:var(--bg3);            border:1px solid var(--border2); }
+
+.a-right {
+  border-left:1px solid var(--border); background:rgba(201,168,76,.02);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; padding:16px 8px;
+}
+.a-right-emoji { font-size:28px; }
+.a-right-pair  { font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--text3); letter-spacing:.08em; text-align:center; }
+
+/* Load more */
+.load-more-wrap { text-align:center; padding:24px 0; }
+.load-more {
+  background:none; border:1px solid var(--border2); color:var(--text3);
+  font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase;
+  padding:13px 32px; cursor:pointer; transition:all .25s;
+}
+.load-more:hover { border-color:var(--gold); color:var(--gold); background:var(--gold3); }
+
+/* ── SIDEBAR ── */
+.sidebar { display:flex; flex-direction:column; gap:20px; }
+
+.sw {
+  background:var(--bg2); border:1px solid var(--border2);
+  overflow:hidden;
+}
+.sw-head {
+  padding:14px 18px; border-bottom:1px solid var(--border);
+  font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--gold);
+  letter-spacing:.2em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.sw-live-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--green);
+  animation:blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+
+/* Economic calendar */
+.cal-item {
+  padding:14px 18px; border-bottom:1px solid var(--border); transition:background .15s;
+}
+.cal-item:last-child { border-bottom:none; }
+.cal-item:hover { background:rgba(255,255,255,.015); }
+.cal-time { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--gold); margin-bottom:4px; }
+.cal-event { font-size:13px; font-weight:600; color:var(--text); margin-bottom:5px; }
+.cal-meta { display:flex; align-items:center; gap:8px; }
+.cal-curr { font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--text3); }
+.cal-impact {
+  font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.1em;
+  text-transform:uppercase; padding:2px 7px;
+}
+.imp-high { color:var(--red);   background:rgba(239,68,68,.08);  border:1px solid rgba(239,68,68,.2);  }
+.imp-med  { color:var(--gold);  background:rgba(201,168,76,.07); border:1px solid rgba(201,168,76,.2); }
+.imp-low  { color:var(--text3); background:var(--bg3);           border:1px solid var(--border2); }
+.cal-prev { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); margin-left:auto; }
+
+/* TradingView economic calendar embed */
+.tv-cal-wrap { height:420px; overflow:hidden; }
+
+/* Market snapshot widget */
+.mkt-snapshot { padding:0; }
+.tv-ticker-mini { height:340px; overflow:hidden; }
+
+/* Analysis CTA */
+.sw-cta { padding:24px 18px; text-align:center; }
+.sw-cta-icon { font-size:36px; margin-bottom:14px; }
+.sw-cta-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:#fff; margin-bottom:8px; }
+.sw-cta-text { color:var(--text3); font-size:13px; line-height:1.65; margin-bottom:18px; }
+.sw-cta-btn {
+  display:block; background:var(--gold); color:#000; padding:12px;
+  font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; text-decoration:none; transition:background .2s;
+}
+.sw-cta-btn:hover { background:var(--gold2); }
+
+/* Pair watchlist in sidebar */
+.pair-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 18px; border-bottom:1px solid var(--border); transition:background .15s;
+}
+.pair-row:last-child { border-bottom:none; }
+.pair-row:hover { background:rgba(255,255,255,.015); }
+.pair-sym { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text); font-weight:600; }
+.pair-bias { font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; }
+.pair-bias.bull { color:var(--green); background:rgba(0,200,150,.07); border:1px solid rgba(0,200,150,.2); }
+.pair-bias.bear { color:var(--red);   background:rgba(239,68,68,.07);  border:1px solid rgba(239,68,68,.2);  }
+.pair-bias.neut { color:var(--text3); background:var(--bg3);            border:1px solid var(--border2); }
+.pair-note { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text3); }
+
+/* ═══════════════════════════════════════════════════════
+   NEWSLETTER STRIP
+═══════════════════════════════════════════════════════ */
+.newsletter-strip {
+  background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:52px 5vw; margin-bottom:0;
+}
+.nl-inner {
+  max-width:1300px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+}
+.nl-left {}
+.nl-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--gold); letter-spacing:.2em; text-transform:uppercase; margin-bottom:12px; }
+.nl-title { font-family:'Playfair Display',serif; font-size:clamp(24px,3vw,38px); font-weight:700; color:#fff; line-height:1.15; margin-bottom:12px; }
+.nl-title em { font-style:italic; color:var(--gold); }
+.nl-sub { color:var(--text3); font-size:14px; line-height:1.7; }
+.nl-right {}
+.nl-form { display:flex; flex-direction:column; gap:10px; }
+.nl-input {
+  width:100%; background:var(--bg); border:1px solid var(--border2);
+  color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px;
+  padding:13px 16px; outline:none; transition:border-color .2s;
+}
+.nl-input:focus { border-color:var(--gold); }
+.nl-btn {
+  background:var(--gold); color:#000; border:none;
+  font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; padding:14px;
+  cursor:pointer; transition:background .2s;
+}
+.nl-btn:hover { background:var(--gold2); }
+.nl-note { font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--text3); letter-spacing:.06em; }
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════ */
+footer {
+  background:#000; border-top:1px solid var(--border);
+  padding:44px 5vw;
+}
+.foot-inner {
+  max-width:1300px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+}
+.foot-logo { font-family:'Playfair Display',serif; font-size:18px; font-weight:900; color:var(--gold); }
+.foot-logo em { font-style:italic; color:var(--border3); }
+.foot-links { display:flex; gap:20px; flex-wrap:wrap; }
+.foot-links a {
+  color:var(--text3); text-decoration:none; font-family:'IBM Plex Mono',monospace;
+  font-size:9px; letter-spacing:.12em; text-transform:uppercase; transition:color .2s;
+}
+.foot-links a:hover { color:var(--gold); }
+.foot-copy { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text4); }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.fade-up { animation:fadeUp .5s ease forwards; }
+.fade-up-1 { animation-delay:.05s; opacity:0; }
+.fade-up-2 { animation-delay:.12s; opacity:0; }
+.fade-up-3 { animation-delay:.20s; opacity:0; }
+.fade-up-4 { animation-delay:.28s; opacity:0; }
+.fade-up-5 { animation-delay:.36s; opacity:0; }
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════════════ */
+@media(max-width:960px) {
+  .masthead-inner { grid-template-columns:1fr; }
+  .mh-right { display:none; }
+  .hero-article { grid-template-columns:1fr; }
+  .hero-visual { min-height:200px; }
+  .hero-content { border-left:none; border-top:1px solid var(--border2); }
+  .content-grid { grid-template-columns:1fr; }
+  .sidebar { order:unset; }
+  .nl-inner { grid-template-columns:1fr; gap:28px; }
+  .mini-charts { flex-wrap:wrap; }
+  .mini-chart-item { min-width:150px; }
+}
+@media(max-width:640px) {
+  .nav-links { display:none; }
+  .nav-toggle { display:flex; }
+  .a-card { grid-template-columns:1fr; }
+  .a-right { display:none; }
+  .hero-content { padding:24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TICKER ═══════════════════════════════════════════ -->
+<div class="ticker-wrap">
+  <div class="tradingview-widget-container" style="height:38px">
+    <div class="tradingview-widget-container__widget"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+    {
+      "symbols":[
+        {"proName":"FX:EURUSD","title":"EUR/USD"},
+        {"proName":"FX:GBPUSD","title":"GBP/USD"},
+        {"proName":"FX:USDJPY","title":"USD/JPY"},
+        {"proName":"FX:GBPJPY","title":"GBP/JPY"},
+        {"proName":"FX:EURJPY","title":"EUR/JPY"},
+        {"proName":"OANDA:XAUUSD","title":"XAU/USD"},
+        {"proName":"OANDA:XAGUSD","title":"XAG/USD"},
+        {"proName":"FX:AUDUSD","title":"AUD/USD"},
+        {"proName":"FX:USDCAD","title":"USD/CAD"},
+        {"proName":"COINBASE:BTCUSD","title":"BTC/USD"},
+        {"proName":"COINBASE:ETHUSD","title":"ETH/USD"},
+        {"proName":"FOREXCOM:US30","title":"US30"},
+        {"proName":"FOREXCOM:SPX500","title":"S&P 500"},
+        {"proName":"NYMEX:CL1!","title":"WTI Oil"}
+      ],
+      "showSymbolLogo":false,"colorTheme":"dark","isTransparent":true,
+      "displayMode":"adaptive","locale":"en","backgroundColor":"#000000"
+    }
+    </script>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">Biddy<em>FX</em></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="news.html" class="active">Market News</a>
+      <a href="chart.html">📊 Charts</a>
+      <a href="contact.html">FAQ</a>
+      <a href="login.html" class="nav-cta">Student Login →</a>
+    </div>
+    <button class="nav-toggle" onclick="this.nextElementSibling.classList.toggle('open')">☰</button>
+  </div>
+  <div class="nav-mobile">
+    <a href="index.html">Home</a>
+    <a href="news.html">Market News</a>
+    <a href="chart.html">📊 Live Charts</a>
+    <a href="contact.html">FAQ & Contact</a>
+    <a href="login.html" style="color:var(--gold)">Student Login →</a>
+  </div>
+</nav>
+
+<!-- ═══ MASTHEAD ═══════════════════════════════════════ -->
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="mh-left fade-up fade-up-1">
+      <div class="mh-eyebrow">
+        <div class="mh-line"></div>
+        <span class="mh-label">Market Intelligence</span>
+        <span class="mh-date" id="todayDate"></span>
+      </div>
+      <h1 class="mh-title">Daily<br><em>Analysis</em></h1>
+      <p class="mh-sub">Institutional-grade forex analysis, high-probability trade setups, and macro commentary — published every trading day by the BiddyFX team.</p>
+    </div>
+    <div class="mh-right fade-up fade-up-2">
+      <div class="mh-stat-row">
+        <div class="mh-stat">
+          <div class="mh-stat-lbl">Weekly Bias</div>
+          <div class="mh-stat-val gold">Bullish USD</div>
+          <div class="mh-stat-chg">DXY holding 104.20</div>
+        </div>
+        <div class="mh-stat">
+          <div class="mh-stat-lbl">Gold Outlook</div>
+          <div class="mh-stat-val up">Bullish</div>
+          <div class="mh-stat-chg">Above $2,300 key level</div>
+        </div>
+      </div>
+      <div class="mh-stat-row">
+        <div class="mh-stat">
+          <div class="mh-stat-lbl">High Impact Events</div>
+          <div class="mh-stat-val gold">3 This Week</div>
+          <div class="mh-stat-chg">NFP · CPI · FOMC</div>
+        </div>
+        <div class="mh-stat">
+          <div class="mh-stat-lbl">Market Sentiment</div>
+          <div class="mh-stat-val dn">Risk-Off</div>
+          <div class="mh-stat-chg">JPY & CHF in demand</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FILTER BAR ═══════════════════════════════════ -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="f-btn active" onclick="filterArticles('all',this)">All <span class="f-count" id="cnt-all">12</span></button>
+    <button class="f-btn" onclick="filterArticles('forex',this)">Forex <span class="f-count" id="cnt-forex">5</span></button>
+    <button class="f-btn" onclick="filterArticles('metals',this)">Gold & Metals <span class="f-count" id="cnt-metals">2</span></button>
+    <button class="f-btn" onclick="filterArticles('crypto',this)">Crypto <span class="f-count" id="cnt-crypto">1</span></button>
+    <button class="f-btn" onclick="filterArticles('setups',this)">Trade Setups <span class="f-count" id="cnt-setups">2</span></button>
+    <button class="f-btn" onclick="filterArticles('macro',this)">Macro <span class="f-count" id="cnt-macro">1</span></button>
+    <button class="f-btn" onclick="filterArticles('edu',this)">Education <span class="f-count" id="cnt-edu">1</span></button>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══════════════════════════════════ -->
+<div class="main-wrap">
+
+  <!-- ── HERO ARTICLE ── -->
+  <div class="hero-section">
+    <div class="hero-article fade-up fade-up-1" data-cat="forex">
+      <div class="hero-visual">
+        <div class="hero-visual-bg"></div>
+        <!-- Decorative candlesticks -->
+        <div class="hero-candles" id="heroCandles"></div>
+        <div class="hero-tag-wrap">
+          <span class="hero-issue">Issue #047 · Featured</span>
+          <span class="hero-tag">🔥 Today's Top Analysis</span>
+        </div>
+        <div class="hero-gradient"></div>
+      </div>
+      <div class="hero-content">
+        <div>
+          <div class="hero-meta">
+            <span class="hm-cat forex">Forex</span>
+            <span class="hm-date" id="heroDate"></span>
+            <span class="hm-read">8 min read</span>
+          </div>
+          <h2 class="hero-title">EUR/USD Rejects Weekly Resistance — Is a 200-Pip Drop Incoming?</h2>
+          <p class="hero-excerpt">Price action on EUR/USD has printed a clear bearish engulfing candle at the 1.0920 weekly resistance zone — a level that has rejected price four times in the past three months. With the DXY finding fresh demand above 104.00 and tomorrow's US CPI print looming, the setup for a continuation move down to the 1.0720 demand zone is building. Here's what we're watching and how we're positioning.</p>
+        </div>
+        <div class="hero-footer">
+          <div class="hero-author">
+            <div class="ha-avatar">👨‍💼</div>
+            <div>
+              <div class="ha-name">BiddyFX Team</div>
+              <div class="ha-role">Lead Analyst</div>
+            </div>
+          </div>
+          <a href="login.html" class="read-btn">Read Full Analysis →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MARKET PULSE ── -->
+  <div class="pulse-bar">
+    <div class="pulse-inner">
+      <div class="pulse-label">📡 Live Market Snapshot</div>
+    </div>
+    <!-- TradingView Mini Chart Widgets -->
+    <div class="mini-charts">
+      <div class="mini-chart-item">
+        <div class="mini-chart-label">EUR/USD</div>
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"FX:EURUSD","width":"100%","height":"100","locale":"en","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":"","noTimeScale":true,"chartOnly":true}
+          </script>
+        </div>
+      </div>
+      <div class="mini-chart-item">
+        <div class="mini-chart-label">GBP/USD</div>
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"FX:GBPUSD","width":"100%","height":"100","locale":"en","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true,"chartOnly":true}
+          </script>
+        </div>
+      </div>
+      <div class="mini-chart-item">
+        <div class="mini-chart-label">XAU/USD (Gold)</div>
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"OANDA:XAUUSD","width":"100%","height":"100","locale":"en","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true,"chartOnly":true}
+          </script>
+        </div>
+      </div>
+      <div class="mini-chart-item">
+        <div class="mini-chart-label">BTC/USD</div>
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"COINBASE:BTCUSD","width":"100%","height":"100","locale":"en","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true,"chartOnly":true}
+          </script>
+        </div>
+      </div>
+      <div class="mini-chart-item">
+        <div class="mini-chart-label">US30 (Dow)</div>
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"FOREXCOM:US30","width":"100%","height":"100","locale":"en","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true,"chartOnly":true}
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT GRID ── -->
+  <div class="content-grid">
+
+    <!-- Article Feed -->
+    <div class="feed">
+      <div class="feed-header">
+        <span class="feed-title">Latest Analysis & Setups</span>
+        <span class="feed-count" id="feedCount">Showing 11 articles</span>
+      </div>
+
+      <div id="articleFeed">
+
+        <!-- Article 1 -->
+        <div class="a-card fade-up fade-up-1" data-cat="setups">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat setups">Trade Setup</span>
+              <span class="a-date" data-days="0"></span>
+              <span class="a-read">5 min read</span>
+            </div>
+            <div class="a-title">GBP/JPY — Clean Trendline Break with 1:3 RR Setup</div>
+            <div class="a-excerpt">GBP/JPY has broken below a 3-week ascending trendline on the 4H chart. Entry on retest, stop above the trendline, targeting the 188.00 demand zone. Risk management details inside.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bull">Bullish Setup</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🇬🇧🇯🇵</div>
+            <div class="a-right-pair">GBP/JPY<br>4H Setup</div>
+          </div>
+        </div>
+
+        <!-- Article 2 -->
+        <div class="a-card fade-up fade-up-2" data-cat="metals">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat metals">Gold & Metals</span>
+              <span class="a-date" data-days="0"></span>
+              <span class="a-read">6 min read</span>
+            </div>
+            <div class="a-title">Gold Consolidates Above $2,300 — Bulls Still in Control</div>
+            <div class="a-excerpt">After last week's sharp rally, Gold is printing a healthy consolidation between $2,280 and $2,340. The macro environment — falling real yields and central bank buying — continues to support the bullish case. Key levels and target zones mapped out.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bull">Bullish</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🥇</div>
+            <div class="a-right-pair">XAU/USD<br>Daily</div>
+          </div>
+        </div>
+
+        <!-- Article 3 -->
+        <div class="a-card fade-up fade-up-3" data-cat="forex">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat forex">Forex</span>
+              <span class="a-date" data-days="1"></span>
+              <span class="a-read">4 min read</span>
+            </div>
+            <div class="a-title">USD/JPY Approaches 152.00 — BOJ Intervention Risk Rising</div>
+            <div class="a-excerpt">Price is within 80 pips of the critical 152.00 level where the Bank of Japan intervened aggressively in 2022 and 2023. While the trend remains bullish, the risk/reward of chasing longs from here is poor. What to do instead.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment neut">Neutral</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🇺🇸🇯🇵</div>
+            <div class="a-right-pair">USD/JPY<br>Daily</div>
+          </div>
+        </div>
+
+        <!-- Article 4 -->
+        <div class="a-card fade-up fade-up-4" data-cat="macro">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat macro">Macro</span>
+              <span class="a-date" data-days="1"></span>
+              <span class="a-read">7 min read</span>
+            </div>
+            <div class="a-title">Fed Holds Rates — What This Means for Every Major Pair</div>
+            <div class="a-excerpt">The Federal Reserve kept rates unchanged at 5.25-5.50% as expected. But the tone of the press conference shifted slightly hawkish, with Powell indicating "no rush" to cut. We break down the impact on EUR/USD, GBP/USD, USD/JPY and Gold.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bull">USD Bullish</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🏦</div>
+            <div class="a-right-pair">MACRO<br>All Pairs</div>
+          </div>
+        </div>
+
+        <!-- Article 5 -->
+        <div class="a-card fade-up fade-up-5" data-cat="forex">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat forex">Forex</span>
+              <span class="a-date" data-days="2"></span>
+              <span class="a-read">5 min read</span>
+            </div>
+            <div class="a-title">AUD/USD — Structural Break Below Support Could Accelerate Downside</div>
+            <div class="a-excerpt">The Aussie has lost the 0.6450 structural support level that held for 6 weeks. Monday's daily close below this zone is technically significant. A retest of the break followed by rejection would give a textbook short entry targeting 0.6280.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bear">Bearish</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🇦🇺🇺🇸</div>
+            <div class="a-right-pair">AUD/USD<br>Daily</div>
+          </div>
+        </div>
+
+        <!-- Article 6 -->
+        <div class="a-card" data-cat="setups">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat setups">Trade Setup</span>
+              <span class="a-date" data-days="2"></span>
+              <span class="a-read">4 min read</span>
+            </div>
+            <div class="a-title">EUR/GBP Double Bottom on 1H — Low-Risk Long Opportunity</div>
+            <div class="a-excerpt">A clean double bottom has formed on EUR/GBP at the 0.8530 level. With RSI divergence confirming, this is a high-quality intraday long setup. Entry, stop, and three take-profit targets fully mapped inside.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bull">Bullish Setup</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🇪🇺🇬🇧</div>
+            <div class="a-right-pair">EUR/GBP<br>1H Setup</div>
+          </div>
+        </div>
+
+        <!-- Article 7 -->
+        <div class="a-card" data-cat="forex">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat forex">Forex</span>
+              <span class="a-date" data-days="3"></span>
+              <span class="a-read">6 min read</span>
+            </div>
+            <div class="a-title">GBP/USD Weekly Outlook — Three Scenarios for the Week Ahead</div>
+            <div class="a-excerpt">Cable sits at a decision point between 1.2480 support and 1.2650 resistance. We map out the bullish scenario, the bearish scenario, and the chop scenario — so you're prepared regardless of which way price moves this week.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment neut">Neutral</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🇬🇧🇺🇸</div>
+            <div class="a-right-pair">GBP/USD<br>Weekly</div>
+          </div>
+        </div>
+
+        <!-- Article 8 -->
+        <div class="a-card" data-cat="crypto">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat crypto">Crypto</span>
+              <span class="a-date" data-days="3"></span>
+              <span class="a-read">5 min read</span>
+            </div>
+            <div class="a-title">Bitcoin Retests Post-Halving Support — Is $70K the New Floor?</div>
+            <div class="a-excerpt">BTC has pulled back to the $62,000-$64,000 accumulation zone after its post-halving rally peak. On-chain data shows long-term holder accumulation at these levels. How this relates to your forex trading and risk sentiment.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bull">Bullish</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">₿</div>
+            <div class="a-right-pair">BTC/USD<br>Daily</div>
+          </div>
+        </div>
+
+        <!-- Article 9 -->
+        <div class="a-card" data-cat="forex">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat forex">Forex</span>
+              <span class="a-date" data-days="4"></span>
+              <span class="a-read">4 min read</span>
+            </div>
+            <div class="a-title">USD/CAD — Oil Price Drop Opens Short Opportunity on Loonie</div>
+            <div class="a-excerpt">WTI crude dropping below $78 is fundamentally bearish for CAD. Combined with a technically clean break above USD/CAD 1.3680 resistance, there's a compelling case for a move toward 1.3820. Setup details and key risk events inside.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bear">USD Bullish</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🇺🇸🇨🇦</div>
+            <div class="a-right-pair">USD/CAD<br>4H</div>
+          </div>
+        </div>
+
+        <!-- Article 10 -->
+        <div class="a-card" data-cat="metals">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat metals">Gold & Metals</span>
+              <span class="a-date" data-days="5"></span>
+              <span class="a-read">6 min read</span>
+            </div>
+            <div class="a-title">Silver Breaking Out — The Forgotten Metal is Finally Moving</div>
+            <div class="a-excerpt">While Gold gets all the attention, Silver (XAG/USD) has quietly broken above $28.50 — a level that capped price for over two years. The Gold/Silver ratio suggests significant room for Silver outperformance in the coming weeks.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment bull">Bullish</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">🥈</div>
+            <div class="a-right-pair">XAG/USD<br>Weekly</div>
+          </div>
+        </div>
+
+        <!-- Article 11 -->
+        <div class="a-card" data-cat="edu">
+          <div class="a-left">
+            <div class="a-meta">
+              <span class="a-cat edu">Education</span>
+              <span class="a-date" data-days="6"></span>
+              <span class="a-read">10 min read</span>
+            </div>
+            <div class="a-title">How to Trade NFP: The Only Framework You'll Ever Need</div>
+            <div class="a-excerpt">Non-Farm Payrolls moves markets more than almost any other event. But most traders get burned because they don't have a framework. Here's the exact pre-NFP checklist, the 3 trade scenarios to prepare for, and how to manage risk during the spike.</div>
+            <div class="a-footer">
+              <span class="a-author">BiddyFX Team</span>
+              <span class="a-sentiment neut">Education</span>
+            </div>
+          </div>
+          <div class="a-right">
+            <div class="a-right-emoji">📚</div>
+            <div class="a-right-pair">All Pairs<br>Strategy</div>
+          </div>
+        </div>
+
+      </div><!-- /articleFeed -->
+
+      <div class="load-more-wrap">
+        <button class="load-more" onclick="showToast()">Load More Articles ↓</button>
+      </div>
+    </div><!-- /feed -->
+
+    <!-- ── SIDEBAR ── -->
+    <div class="sidebar">
+
+      <!-- Economic Calendar -->
+      <div class="sw">
+        <div class="sw-head">
+          Economic Calendar
+          <div class="sw-live-dot"></div>
+        </div>
+        <!-- TradingView Economic Calendar Widget -->
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+          {
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "width": "100%",
+            "height": "400",
+            "locale": "en",
+            "importanceFilter": "0,1",
+            "countryFilter": "us,eu,gb,jp,au,ca,ch,nz"
+          }
+          </script>
+        </div>
+      </div>
+
+      <!-- BiddyFX Bias Board -->
+      <div class="sw">
+        <div class="sw-head">BiddyFX Bias Board <div class="sw-live-dot"></div></div>
+        <div class="pair-row"><span class="pair-sym">EUR/USD</span><span class="pair-note">Below 1.0850</span><span class="pair-bias bear">Bearish</span></div>
+        <div class="pair-row"><span class="pair-sym">GBP/USD</span><span class="pair-note">Range 1.24–1.26</span><span class="pair-bias neut">Neutral</span></div>
+        <div class="pair-row"><span class="pair-sym">USD/JPY</span><span class="pair-note">Near BOJ zone</span><span class="pair-bias neut">Cautious</span></div>
+        <div class="pair-row"><span class="pair-sym">GBP/JPY</span><span class="pair-note">Trendline break</span><span class="pair-bias bear">Bearish</span></div>
+        <div class="pair-row"><span class="pair-sym">AUD/USD</span><span class="pair-note">Below 0.6450</span><span class="pair-bias bear">Bearish</span></div>
+        <div class="pair-row"><span class="pair-sym">XAU/USD</span><span class="pair-note">Above $2,300</span><span class="pair-bias bull">Bullish</span></div>
+        <div class="pair-row"><span class="pair-sym">BTC/USD</span><span class="pair-note">$62K support</span><span class="pair-bias bull">Bullish</span></div>
+      </div>
+
+      <!-- Market Overview Widget -->
+      <div class="sw">
+        <div class="sw-head">Live Market Overview <div class="sw-live-dot"></div></div>
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+          {
+            "colorTheme":"dark","dateRange":"1D","showChart":false,"locale":"en",
+            "width":"100%","height":"340","isTransparent":true,"showFloatingTooltip":false,
+            "tabs":[
+              {"title":"Forex","symbols":[
+                {"s":"FX:EURUSD","d":"EUR/USD"},{"s":"FX:GBPUSD","d":"GBP/USD"},
+                {"s":"FX:USDJPY","d":"USD/JPY"},{"s":"FX:GBPJPY","d":"GBP/JPY"},
+                {"s":"OANDA:XAUUSD","d":"Gold"}
+              ],"originalTitle":"Forex"},
+              {"title":"Crypto","symbols":[
+                {"s":"COINBASE:BTCUSD","d":"Bitcoin"},{"s":"COINBASE:ETHUSD","d":"Ethereum"}
+              ],"originalTitle":"Crypto"},
+              {"title":"Indices","symbols":[
+                {"s":"FOREXCOM:US30","d":"US30"},{"s":"FOREXCOM:SPX500","d":"S&P500"},
+                {"s":"FOREXCOM:NAS100","d":"NAS100"}
+              ],"originalTitle":"Indices"}
+            ]
+          }
+          </script>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="sw">
+        <div class="sw-cta">
+          <div class="sw-cta-icon">🎓</div>
+          <div class="sw-cta-title">Learn to Trade Like This</div>
+          <div class="sw-cta-text">The BiddyFX Foundation course teaches you to read price action and identify setups like these — free.</div>
+          <a href="login.html" class="sw-cta-btn">Start Free Course →</a>
+        </div>
+      </div>
+
+    </div><!-- /sidebar -->
+
+  </div><!-- /content-grid -->
+
+</div><!-- /main-wrap -->
+
+<!-- ═══ NEWSLETTER ═══════════════════════════════════ -->
+<div class="newsletter-strip">
+  <div class="nl-inner">
+    <div class="nl-left">
+      <div class="nl-eyebrow">Daily Briefing</div>
+      <h2 class="nl-title">Get the Analysis<br><em>Before the Market Opens</em></h2>
+      <p class="nl-sub">Join 2,400+ traders who get BiddyFX's daily pre-market briefing — key levels, bias, and setups for the day ahead. Free for Foundation students.</p>
+    </div>
+    <div class="nl-right">
+      <div class="nl-form">
+        <input type="text" class="nl-input" placeholder="Your name">
+        <input type="email" class="nl-input" placeholder="Your email address">
+        <button class="nl-btn" onclick="nlSubmit(this)">Subscribe to Daily Briefing →</button>
+        <span class="nl-note">No spam. Unsubscribe any time. Free for Foundation students.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══════════════════════════════════════ -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-logo">Biddy<em>FX</em></div>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="news.html">Market News</a>
+      <a href="chart.html">Charts</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="contact.html">FAQ & Contact</a>
+      <a href="login.html">Login</a>
+    </div>
+    <span class="foot-copy">© 2025 BiddyFX Academy. For educational purposes only.</span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+
+// ── Set dates ────────────────────────────────────────────
+const now = new Date();
+const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+document.getElementById('todayDate').textContent = now.toLocaleDateString('en-GB', opts);
+document.getElementById('heroDate').textContent  = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+
+document.querySelectorAll('[data-days]').forEach(el => {
+  const d = new Date(now);
+  d.setDate(d.getDate() - parseInt(el.dataset.days));
+  // Skip weekends
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+  el.textContent = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+});
+
+// ── Candlestick decoration ───────────────────────────────
+const sizes = [
+  {wick:18,body:28,up:true},{wick:12,body:18,up:false},{wick:22,body:36,up:true},
+  {wick:10,body:14,up:false},{wick:30,body:44,up:true},{wick:8,body:22,up:false},
+  {wick:24,body:32,up:true},{wick:16,body:26,up:false},{wick:20,body:40,up:true},
+  {wick:14,body:18,up:false},{wick:28,body:38,up:true},{wick:10,body:16,up:false},
+  {wick:18,body:30,up:true},{wick:22,body:20,up:false},{wick:26,body:42,up:true},
+];
+const cc = document.getElementById('heroCandles');
+if (cc) {
+  sizes.forEach(s => {
+    cc.innerHTML += `<div class="hc ${s.up?'up':'dn'}">
+      <div class="hc-wick" style="height:${s.wick}px"></div>
+      <div class="hc-body" style="height:${s.body}px"></div>
+      <div class="hc-wick" style="height:${s.wick*0.6}px"></div>
+    </div>`;
+  });
+}
+
+// ── Filter articles ──────────────────────────────────────
+let currentFilter = 'all';
+function filterArticles(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('#articleFeed .a-card');
+  let visible = 0;
+  cards.forEach(c => {
+    const match = cat === 'all' || c.dataset.cat === cat;
+    c.classList.toggle('hidden', !match);
+    if (match) visible++;
+  });
+  document.getElementById('feedCount').textContent = `Showing ${visible} article${visible !== 1 ? 's' : ''}`;
+}
+
+// Recount filter badges
+window.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll('#articleFeed .a-card');
+  const counts = { all: cards.length };
+  cards.forEach(c => {
+    const cat = c.dataset.cat;
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  Object.entries(counts).forEach(([cat, n]) => {
+    const el = document.getElementById('cnt-' + cat);
+    if (el) el.textContent = n;
+  });
+  document.getElementById('feedCount').textContent = `Showing ${cards.length} articles`;
+});
+
+// ── Newsletter submit ────────────────────────────────────
+function nlSubmit(btn) {
+  btn.textContent = '✓ You\'re on the list — check your inbox!';
+  btn.style.background = 'var(--green)';
+  btn.style.color = '#000';
+  btn.disabled = true;
+}
+
+// ── Load more toast ──────────────────────────────────────
+function showToast() {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#161616;border:1px solid #272727;color:#D4C5A9;font-family:"IBM Plex Mono",monospace;font-size:10px;padding:12px 24px;letter-spacing:.08em;z-index:9999;box-shadow:0 6px 28px rgba(0,0,0,.6);transition:opacity .3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = '📬 More articles coming soon — check back daily!';
+  t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 3000);
+}
+</script>
+</body>
+</html>
