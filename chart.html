@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiddyFX Chart Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold: #C9A84C;
+  --gold2: #F0D080;
+  --green: #00C896;
+  --red: #EF4444;
+  --bg: #0B0B0B;
+  --bg2: #111111;
+  --bg3: #161616;
+  --border: #1E1E1E;
+  --border2: #2A2A2A;
+  --text: #D4C5A9;
+  --text2: #888;
+  --text3: #444;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+/* ── TOPBAR ─────────────────────────────────── */
+#topbar {
+  height: 48px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 100;
+  position: relative;
+  user-select: none;
+}
+
+.tb-logo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 18px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.tb-logo-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+.tb-logo-name em { font-style: italic; color: var(--text); }
+.tb-logo-sub {
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.tb-trade-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+}
+.tb-trade-label {
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+.btn-buy {
+  background: var(--green);
+  color: #000;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: opacity .15s;
+  text-transform: uppercase;
+}
+.btn-buy:hover { opacity: .85; }
+.btn-sell {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: opacity .15s;
+  text-transform: uppercase;
+}
+.btn-sell:hover { opacity: .85; }
+
+.tb-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 16px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+}
+.tb-stat { display: flex; flex-direction: column; gap: 2px; }
+.tb-stat-label { font-size: 8px; color: var(--text3); letter-spacing: .12em; text-transform: uppercase; }
+.tb-stat-val   { font-size: 11px; color: var(--text); }
+
+.tb-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.tb-r-btn {
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  color: var(--text3);
+  height: 100%;
+  width: 44px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tb-r-btn:hover { color: var(--gold); background: rgba(201,168,76,.06); }
+.tb-r-btn.active { color: var(--gold); }
+
+/* ── LAYOUT ─────────────────────────────────── */
+#layout {
+  display: flex;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+/* ── TRADINGVIEW CONTAINER ───────────────────── */
+#tvWrap {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+}
+#tvWrap iframe,
+#tvWrap > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── TRADE PANEL ─────────────────────────────── */
+#tradePanel {
+  width: 0;
+  height: 100%;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width .28s cubic-bezier(.4,0,.2,1);
+  flex-shrink: 0;
+}
+#tradePanel.open { width: 280px; }
+
+.tp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tp-title { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--text); }
+.tp-close {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 16px; transition: color .15s;
+}
+.tp-close:hover { color: var(--red); }
+
+.tp-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  min-height: 0;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* Direction tabs */
+.tp-tabs { display: flex; border: 1px solid var(--border2); }
+.tp-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  color: var(--text3);
+}
+.tp-tab.buy.active  { background: var(--green); color: #000; }
+.tp-tab.sell.active { background: var(--red); color: #fff; }
+.tp-tab:not(.active):hover { background: var(--bg3); color: var(--text); }
+
+/* Fields */
+.tp-field { display: flex; flex-direction: column; gap: 5px; }
+.tp-label { font-size: 8px; color: var(--text3); letter-spacing: .14em; text-transform: uppercase; }
+.tp-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color .15s;
+}
+.tp-input:focus { border-color: var(--gold); }
+.tp-2col { display: flex; gap: 8px; }
+.tp-2col .tp-field { flex: 1; }
+
+/* Risk box */
+.risk-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.risk-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.risk-lbl { font-size: 8px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; }
+.risk-val { font-size: 10px; font-weight: 600; color: var(--text); }
+.risk-val.pos { color: var(--green); }
+.risk-val.neg { color: var(--red); }
+.risk-val.gold { color: var(--gold); }
+.risk-hr { height: 1px; background: var(--border); margin: 2px 0; }
+
+/* Execute */
+.tp-exec {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+.tp-exec.buy  { background: var(--green); color: #000; }
+.tp-exec.sell { background: var(--red); color: #fff; }
+.tp-exec:hover { opacity: .87; }
+
+/* Trade log */
+.log-title {
+  font-size: 8px; color: var(--gold); letter-spacing: .18em; text-transform: uppercase;
+  padding: 12px 16px 6px; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+#tradeLog { flex: 1; overflow-y: auto; min-height: 0; }
+.log-empty { padding: 16px; font-size: 10px; color: var(--text3); letter-spacing: .06em; }
+.log-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.log-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.log-badge.buy  { background: rgba(0,200,150,.12); color: var(--green); border: 1px solid rgba(0,200,150,.2); }
+.log-badge.sell { background: rgba(239,68,68,.1); color: var(--red);   border: 1px solid rgba(239,68,68,.2); }
+.log-info { flex: 1; min-width: 0; }
+.log-sym { font-size: 11px; color: var(--text); font-weight: 600; }
+.log-detail { font-size: 9px; color: var(--text3); margin-top: 2px; line-height: 1.5; }
+.log-pnl { font-size: 11px; font-weight: 600; margin-top: 3px; }
+.log-actions { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; flex-shrink: 0; }
+.log-time { font-size: 8px; color: var(--text3); white-space: nowrap; }
+.log-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .08em;
+  padding: 3px 8px;
+  border: 1px solid var(--border2);
+  background: none;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.log-btn.close-btn { color: var(--gold); border-color: rgba(201,168,76,.3); }
+.log-btn.close-btn:hover { background: rgba(201,168,76,.1); }
+.log-btn.del-btn:hover { color: var(--red); border-color: rgba(239,68,68,.3); }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 10px 22px;
+  letter-spacing: .08em;
+  box-shadow: 0 6px 28px rgba(0,0,0,.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s, transform .22s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+  .tb-stats { display: none; }
+  #tradePanel.open { width: 100%; position: fixed; right: 0; top: 48px; bottom: 0; z-index: 300; height: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ TOPBAR ══════════════ -->
+<div id="topbar">
+
+  <a href="index.html" class="tb-logo">
+    <div class="tb-logo-name">Biddy<em>FX</em></div>
+    <div class="tb-logo-sub">Chart Terminal</div>
+  </a>
+
+  <div class="tb-trade-wrap">
+    <span class="tb-trade-label">Trade</span>
+    <button class="btn-buy"  onclick="openTrade('buy')">▲ Buy</button>
+    <button class="btn-sell" onclick="openTrade('sell')">▼ Sell</button>
+  </div>
+
+  <div class="tb-stats">
+    <div class="tb-stat">
+      <span class="tb-stat-label">Open Trades</span>
+      <span class="tb-stat-val" id="statOpen">0</span>
+    </div>
+    <div class="tb-stat">
+      <span class="tb-stat-label">Closed P&amp;L</span>
+      <span class="tb-stat-val" id="statPnl">—</span>
+    </div>
+    <div class="tb-stat">
+      <span class="tb-stat-label">Win Rate</span>
+      <span class="tb-stat-val" id="statWR">—</span>
+    </div>
+    <div class="tb-stat">
+      <span class="tb-stat-label">Total Trades</span>
+      <span class="tb-stat-val" id="statTotal">0</span>
+    </div>
+  </div>
+
+  <div class="tb-right">
+    <button class="tb-r-btn" id="tpBtn" onclick="togglePanel()" title="Trade Panel">📋</button>
+    <button class="tb-r-btn" onclick="toggleFS()" title="Fullscreen">⛶</button>
+  </div>
+
+</div>
+
+<!-- ══════════════ LAYOUT ══════════════ -->
+<div id="layout">
+
+  <!-- TradingView Advanced Chart -->
+  <div id="tvWrap">
+    <div id="tv_chart"></div>
+  </div>
+
+  <!-- Trade Panel -->
+  <div id="tradePanel">
+
+    <div class="tp-header">
+      <span class="tp-title">Trade Panel</span>
+      <button class="tp-close" onclick="togglePanel()">✕</button>
+    </div>
+
+    <div class="tp-body">
+
+      <div class="tp-tabs">
+        <button class="tp-tab buy active" id="tabBuy"  onclick="setDir('buy')">▲ BUY</button>
+        <button class="tp-tab sell"       id="tabSell" onclick="setDir('sell')">▼ SELL</button>
+      </div>
+
+      <div class="tp-field">
+        <span class="tp-label">Symbol</span>
+        <input type="text" class="tp-input" id="fSym" value="EURUSD" placeholder="e.g. EURUSD, XAUUSD, BTC" oninput="calc()">
+      </div>
+
+      <div class="tp-2col">
+        <div class="tp-field">
+          <span class="tp-label">Entry Price</span>
+          <input type="number" class="tp-input" id="fEntry" placeholder="0.00000" step="any" oninput="calc()">
+        </div>
+        <div class="tp-field">
+          <span class="tp-label">Lot Size</span>
+          <input type="number" class="tp-input" id="fLot" value="0.01" min="0.01" step="0.01" oninput="calc()">
+        </div>
+      </div>
+
+      <div class="tp-2col">
+        <div class="tp-field">
+          <span class="tp-label">Stop Loss</span>
+          <input type="number" class="tp-input" id="fSL" placeholder="0.00000" step="any" oninput="calc()">
+        </div>
+        <div class="tp-field">
+          <span class="tp-label">Take Profit</span>
+          <input type="number" class="tp-input" id="fTP" placeholder="0.00000" step="any" oninput="calc()">
+        </div>
+      </div>
+
+      <div class="tp-field">
+        <span class="tp-label">Account Balance ($) — optional, for risk %</span>
+        <input type="number" class="tp-input" id="fAcct" placeholder="e.g. 1000" oninput="calc()">
+      </div>
+
+      <div class="risk-box">
+        <div class="risk-row"><span class="risk-lbl">Direction</span><span class="risk-val" id="rDir">—</span></div>
+        <div class="risk-row"><span class="risk-lbl">Risk (pips)</span><span class="risk-val" id="rPips">—</span></div>
+        <div class="risk-row"><span class="risk-lbl">Reward (pips)</span><span class="risk-val" id="rRewPips">—</span></div>
+        <div class="risk-hr"></div>
+        <div class="risk-row"><span class="risk-lbl">Risk ($)</span><span class="risk-val neg" id="rRiskD">—</span></div>
+        <div class="risk-row"><span class="risk-lbl">Reward ($)</span><span class="risk-val pos" id="rRewD">—</span></div>
+        <div class="risk-row"><span class="risk-lbl">Risk %</span><span class="risk-val" id="rPct">—</span></div>
+        <div class="risk-hr"></div>
+        <div class="risk-row"><span class="risk-lbl">R : R Ratio</span><span class="risk-val gold" id="rRR">—</span></div>
+      </div>
+
+    </div>
+
+    <button class="tp-exec buy" id="execBtn" onclick="execute()">▲ PLACE BUY</button>
+
+    <div class="log-title">TRADE LOG</div>
+    <div id="tradeLog"></div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- TradingView Library -->
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+'use strict';
+
+// ── TradingView Widget ───────────────────────
+new TradingView.widget({
+  container_id: 'tv_chart',
+  autosize: true,
+  symbol: 'FX:EURUSD',
+  interval: 'H1',
+  timezone: 'Etc/UTC',
+  theme: 'dark',
+  style: '1',
+  locale: 'en',
+  toolbar_bg: '#111111',
+  enable_publishing: false,
+  allow_symbol_change: true,
+  save_image: true,
+  withdateranges: true,
+  show_popup_button: false,
+  hide_top_toolbar: false,
+  hide_legend: false,
+  studies: [],
+  overrides: {
+    'mainSeriesProperties.candleStyle.upColor':         '#00C896',
+    'mainSeriesProperties.candleStyle.downColor':       '#EF4444',
+    'mainSeriesProperties.candleStyle.borderUpColor':   '#00C896',
+    'mainSeriesProperties.candleStyle.borderDownColor': '#EF4444',
+    'mainSeriesProperties.candleStyle.wickUpColor':     '#00C896',
+    'mainSeriesProperties.candleStyle.wickDownColor':   '#EF4444',
+    'paneProperties.background':                        '#0B0B0B',
+    'paneProperties.backgroundType':                    'solid',
+    'paneProperties.vertGridProperties.color':          '#111111',
+    'paneProperties.horzGridProperties.color':          '#111111',
+    'scalesProperties.textColor':                       '#888888',
+    'scalesProperties.lineColor':                       '#1E1E1E',
+  },
+  loading_screen: {
+    backgroundColor: '#0B0B0B',
+    foregroundColor: '#C9A84C',
+  },
+  custom_font_family: "'IBM Plex Mono'",
+});
+
+// ── State ────────────────────────────────────
+let dir    = 'buy';
+let trades = JSON.parse(localStorage.getItem('bfx_trades2') || '[]');
+let open   = false;
+let _toast;
+
+// Pip value per standard lot (100k) per pip in USD
+const PIP_USD = {
+  EURUSD:10, GBPUSD:10, AUDUSD:10, NZDUSD:10, USDCAD:7.6,
+  USDCHF:10.2, USDJPY:6.7, EURJPY:6.7, GBPJPY:6.7, AUDJPY:6.7,
+  CADJPY:7.4, CHFJPY:10.2, XAUUSD:1, XAGUSD:0.5,
+  BTCUSD:1, ETHUSD:0.1, BNBUSD:0.1, SOLUSD:0.1,
+  USOIL:10, UKOIL:10, NATGAS:10,
+  DEFAULT: 10,
+};
+
+// Pip size per symbol
+const PIP_SIZE = {
+  USDJPY:0.01, EURJPY:0.01, GBPJPY:0.01, AUDJPY:0.01,
+  CADJPY:0.01, CHFJPY:0.01, NZDJPY:0.01,
+  XAUUSD:0.01, XAGUSD:0.001,
+  BTCUSD:1, ETHUSD:1, BNBUSD:0.01, SOLUSD:0.01,
+  USOIL:0.01, UKOIL:0.01, NATGAS:0.001,
+  DEFAULT: 0.0001,
+};
+
+function getPip(sym) { return PIP_SIZE[sym] || PIP_SIZE.DEFAULT; }
+function getVal(sym, lot) { return (PIP_USD[sym] || PIP_USD.DEFAULT) * lot; }
+
+// ── Panel ─────────────────────────────────────
+function togglePanel() {
+  open = !open;
+  document.getElementById('tradePanel').classList.toggle('open', open);
+  document.getElementById('tpBtn').classList.toggle('active', open);
+}
+function openTrade(d) {
+  setDir(d);
+  if (!open) togglePanel();
+}
+
+// ── Direction ─────────────────────────────────
+function setDir(d) {
+  dir = d;
+  document.getElementById('tabBuy').classList.toggle('active', d === 'buy');
+  document.getElementById('tabSell').classList.toggle('active', d === 'sell');
+  const btn = document.getElementById('execBtn');
+  btn.className = 'tp-exec ' + d;
+  btn.textContent = d === 'buy' ? '▲ PLACE BUY' : '▼ PLACE SELL';
+  const rdir = document.getElementById('rDir');
+  rdir.textContent = d === 'buy' ? '▲ LONG' : '▼ SHORT';
+  rdir.style.color = d === 'buy' ? 'var(--green)' : 'var(--red)';
+  calc();
+}
+
+// ── Risk Calculator ───────────────────────────
+function calc() {
+  const sym   = (document.getElementById('fSym').value || 'EURUSD').toUpperCase().trim();
+  const entry = +document.getElementById('fEntry').value || 0;
+  const sl    = +document.getElementById('fSL').value    || 0;
+  const tp    = +document.getElementById('fTP').value    || 0;
+  const lot   = +document.getElementById('fLot').value   || 0.01;
+  const acct  = +document.getElementById('fAcct').value  || 0;
+
+  const ps = getPip(sym);
+  const pv = getVal(sym, lot);
+
+  if (entry && sl) {
+    const riskPips = Math.abs(entry - sl) / ps;
+    const rewPips  = tp ? Math.abs(tp - entry) / ps : 0;
+    const riskD    = riskPips * pv;
+    const rewD     = rewPips  * pv;
+    const rr       = riskD > 0 && rewD > 0 ? (rewD / riskD).toFixed(2) : null;
+    const riskPct  = acct ? ((riskD / acct) * 100).toFixed(2) + '%' : '—';
+
+    $('rPips',    riskPips.toFixed(1) + ' pips');
+    $('rRewPips', tp ? rewPips.toFixed(1) + ' pips' : '—');
+    $('rRiskD',   '$' + riskD.toFixed(2));
+    $('rRewD',    tp ? '$' + rewD.toFixed(2) : '—');
+    $('rPct',     riskPct);
+
+    if (rr) {
+      $('rRR', '1 : ' + rr);
+      const rrEl = document.getElementById('rRR');
+      rrEl.style.color = +rr >= 2 ? 'var(--green)' : +rr >= 1 ? 'var(--gold)' : 'var(--red)';
+    } else {
+      $('rRR', '—');
+    }
+  } else {
+    ['rPips','rRewPips','rRiskD','rRewD','rPct','rRR'].forEach(id => $(id, '—'));
+  }
+}
+
+function $(id, v) { const e = document.getElementById(id); if(e) e.textContent = v; }
+
+// ── Execute ───────────────────────────────────
+function execute() {
+  const sym   = (document.getElementById('fSym').value || '').toUpperCase().trim();
+  const entry = +document.getElementById('fEntry').value;
+  const sl    = +document.getElementById('fSL').value  || null;
+  const tp    = +document.getElementById('fTP').value  || null;
+  const lot   = +document.getElementById('fLot').value || 0.01;
+
+  if (!sym)   return toast('⚠ Enter a symbol first');
+  if (!entry) return toast('⚠ Enter an entry price');
+
+  trades.unshift({ id: Date.now(), sym, dir, entry, sl, tp, lot, time: new Date().toISOString(), open: true, pnl: null, closePrice: null });
+  save();
+  render();
+  stats();
+  toast((dir === 'buy' ? '▲ BUY ' : '▼ SELL ') + sym + ' @ ' + entry + ' — placed ✓');
+}
+
+// ── Close trade ───────────────────────────────
+function closeTrade(id) {
+  const cp = parseFloat(prompt('Enter close price:'));
+  if (!cp || isNaN(cp)) return;
+  const t = trades.find(x => x.id === id);
+  if (!t) return;
+  const ps = getPip(t.sym);
+  const pv = getVal(t.sym, t.lot);
+  const rawPips = (cp - t.entry) / ps;
+  const pips = t.dir === 'buy' ? rawPips : -rawPips;
+  t.pnl = +(pips * pv).toFixed(2);
+  t.closePrice = cp;
+  t.open = false;
+  save(); render(); stats();
+  const s = t.pnl >= 0 ? '+' : '';
+  toast('Trade closed · ' + s + '$' + t.pnl.toFixed(2) + (t.pnl >= 0 ? ' ✓' : ''));
+}
+
+function delTrade(id) {
+  trades = trades.filter(x => x.id !== id);
+  save(); render(); stats();
+}
+
+function save() { localStorage.setItem('bfx_trades2', JSON.stringify(trades)); }
+
+// ── Render log ────────────────────────────────
+function render() {
+  const log = document.getElementById('tradeLog');
+  if (!trades.length) {
+    log.innerHTML = '<div class="log-empty">No trades yet.<br>Use Buy / Sell above.</div>';
+    return;
+  }
+  log.innerHTML = trades.map(t => {
+    const dt = new Date(t.time).toLocaleDateString('en-GB', { day:'2-digit', month:'short' })
+             + ' ' + new Date(t.time).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    let pnlHtml = '';
+    if (t.pnl != null) {
+      const sign  = t.pnl >= 0 ? '+' : '';
+      const color = t.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+      pnlHtml = `<div class="log-pnl" style="color:${color}">${sign}$${Math.abs(t.pnl).toFixed(2)}</div>`;
+    } else if (t.open) {
+      pnlHtml = `<div class="log-pnl" style="color:var(--text3)">Open</div>`;
+    }
+    const closeBtn = t.open
+      ? `<button class="log-btn close-btn" onclick="closeTrade(${t.id})">Close</button>`
+      : '';
+    return `
+    <div class="log-item">
+      <span class="log-badge ${t.dir}">${t.dir === 'buy' ? 'BUY' : 'SELL'}</span>
+      <div class="log-info">
+        <div class="log-sym">${t.sym} · ${t.lot}L</div>
+        <div class="log-detail">
+          Entry: ${t.entry}${t.sl ? ' · SL: ' + t.sl : ''}${t.tp ? ' · TP: ' + t.tp : ''}
+          ${t.closePrice ? '<br>Close: ' + t.closePrice : ''}
+        </div>
+        ${pnlHtml}
+      </div>
+      <div class="log-actions">
+        <span class="log-time">${dt}</span>
+        ${closeBtn}
+        <button class="log-btn del-btn" onclick="delTrade(${t.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Stats ─────────────────────────────────────
+function stats() {
+  const openN   = trades.filter(t => t.open).length;
+  const closed  = trades.filter(t => !t.open && t.pnl != null);
+  const totalPnl = closed.reduce((a, t) => a + t.pnl, 0);
+  const wins    = closed.filter(t => t.pnl > 0).length;
+  const wr      = closed.length ? Math.round(wins / closed.length * 100) + '%' : '—';
+
+  $('statOpen', openN);
+  $('statTotal', trades.length);
+  const pnlEl = document.getElementById('statPnl');
+  if (closed.length) {
+    pnlEl.textContent = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(totalPnl).toFixed(2);
+    pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    pnlEl.textContent = '—';
+    pnlEl.style.color = '';
+  }
+  $('statWR', wr);
+}
+
+// ── Toast ─────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toast);
+  _toast = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Fullscreen ────────────────────────────────
+function toggleFS() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+// ── Init ──────────────────────────────────────
+render();
+stats();
+setDir('buy');
+</script>
+</body>
+</html>
