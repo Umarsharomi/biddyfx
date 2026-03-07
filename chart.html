@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BiddyFX Chart Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Rajdhani:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+<!-- Lightweight Charts by TradingView (open source) -->
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+:root{
+  --gold:#C9A84C;--gold2:#F0D080;--gold3:#8B6914;
+  --bg:#000;--bg2:#060606;--card:#0a0a0a;--card2:#0d0d0d;
+  --border:#181818;--border2:#222;--border3:#2a2a2a;
+  --text:#d4cabb;--muted:#444;--dim:#1e1e1e;
+  --green:#00C896;--red:#FF4444;--blue:#3D8EF0;
+  --up:#00C896;--dn:#FF4444;
+  --topbar:48px;--toolbar:40px;--watchlist:220px;--bottom:140px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;}
+
+/* ═══════════════════════ TOP BAR ═══════════════════════ */
+#topbar{
+  height:var(--topbar);background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:10px;z-index:100;position:relative;
+  flex-shrink:0;
+}
+.tb-logo{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--gold);white-space:nowrap;margin-right:4px;}
+.tb-logo em{font-style:italic;color:#fff;}
+.tb-logo-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--border2);flex-shrink:0;}
+
+/* Symbol selector */
+.tb-symbol{display:flex;align-items:center;gap:7px;cursor:pointer;padding:5px 10px;border:1px solid var(--border2);transition:all .2s;}
+.tb-symbol:hover{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.tb-sym-name{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#fff;}
+.tb-sym-cat{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;}
+.tb-sym-arrow{color:var(--muted);font-size:10px;}
+
+/* Price display */
+.tb-price{display:flex;align-items:baseline;gap:6px;}
+.tb-price-val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#fff;transition:color .3s;}
+.tb-price-chg{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;}
+.tb-price-chg.up{color:var(--green);}
+.tb-price-chg.dn{color:var(--red);}
+.tb-ohlc{display:flex;gap:12px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.tb-ohlc span b{color:#666;}
+
+/* Timeframe buttons */
+.tf-group{display:flex;gap:2px;margin-left:4px;}
+.tf-btn{background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;padding:5px 8px;cursor:pointer;transition:all .2s;border-radius:2px;}
+.tf-btn:hover{color:var(--text);background:var(--dim);}
+.tf-btn.active{color:var(--gold);background:rgba(201,168,76,.08);}
+
+/* Chart type */
+.ct-group{display:flex;gap:2px;}
+.ct-btn{background:none;border:none;color:var(--muted);font-size:14px;padding:5px 7px;cursor:pointer;transition:all .2s;border-radius:2px;}
+.ct-btn:hover{background:var(--dim);color:var(--text);}
+.ct-btn.active{color:var(--gold);background:rgba(201,168,76,.08);}
+
+.tb-spacer{flex:1;}
+
+/* Indicator btn */
+.ind-btn{background:none;border:1px solid var(--border2);color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap;}
+.ind-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* Nav links */
+.tb-nav{display:flex;gap:2px;}
+.tb-nav-link{background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;padding:5px 9px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s;text-decoration:none;display:flex;align-items:center;}
+.tb-nav-link:hover{color:var(--gold);}
+
+/* ═══════════════════════ DRAWING TOOLBAR ═══════════════════════ */
+#drawtoolbar{
+  height:var(--toolbar);background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:2px;flex-shrink:0;overflow-x:auto;
+}
+.dt-group{display:flex;gap:1px;padding-right:8px;border-right:1px solid var(--border2);margin-right:6px;}
+.dt-group:last-child{border-right:none;}
+.dt-btn{background:none;border:1px solid transparent;color:var(--muted);font-size:13px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;border-radius:2px;flex-shrink:0;}
+.dt-btn:hover{background:var(--dim);color:var(--text);border-color:var(--border2);}
+.dt-btn.active{background:rgba(201,168,76,.1);color:var(--gold);border-color:rgba(201,168,76,.3);}
+.dt-btn[title]:hover::after{content:attr(title);position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);background:#111;border:1px solid var(--border2);color:var(--text);font-family:'Space Mono',monospace;font-size:8px;padding:3px 7px;white-space:nowrap;z-index:999;pointer-events:none;}
+.dt-label{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;padding:0 4px;align-self:center;white-space:nowrap;}
+.dt-color{width:16px;height:16px;border-radius:50%;cursor:pointer;border:1px solid var(--border2);}
+.dt-thickness{background:var(--dim);border:1px solid var(--border2);color:var(--text);font-family:'Space Mono',monospace;font-size:10px;padding:3px 6px;width:40px;outline:none;}
+.clear-btn{background:none;border:1px solid rgba(255,68,68,.2);color:var(--red);font-family:'Space Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s;margin-left:auto;flex-shrink:0;}
+.clear-btn:hover{background:rgba(255,68,68,.08);}
+
+/* ═══════════════════════ MAIN LAYOUT ═══════════════════════ */
+#main{display:flex;flex:1;overflow:hidden;height:calc(100vh - var(--topbar) - var(--toolbar) - 22px);}
+
+/* ═══════════════════════ WATCHLIST ═══════════════════════ */
+#watchlist{
+  width:var(--watchlist);min-width:var(--watchlist);background:var(--bg2);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;
+  flex-shrink:0;
+}
+.wl-header{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.wl-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;}
+.wl-search{width:100%;background:#000;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Space Mono',monospace;font-size:10px;padding:7px 12px;outline:none;}
+.wl-search::placeholder{color:var(--muted);}
+.wl-cats{display:flex;overflow-x:auto;padding:6px 8px;gap:4px;border-bottom:1px solid var(--border);}
+.wl-cat{background:none;border:1px solid var(--border2);color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;padding:3px 8px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+.wl-cat.active,.wl-cat:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.05);}
+.wl-list{flex:1;overflow-y:auto;}
+.wl-list::-webkit-scrollbar{width:3px;}
+.wl-list::-webkit-scrollbar-thumb{background:var(--border2);}
+.wl-item{display:flex;align-items:center;padding:7px 12px;cursor:pointer;border-bottom:1px solid rgba(24,24,24,.6);transition:background .15s;gap:6px;}
+.wl-item:hover{background:rgba(255,255,255,.02);}
+.wl-item.active{background:rgba(201,168,76,.05);border-left:2px solid var(--gold);}
+.wl-sym{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wl-price{font-family:'Space Mono',monospace;font-size:9px;color:#666;text-align:right;}
+.wl-chg{font-family:'Space Mono',monospace;font-size:8px;text-align:right;}
+.wl-chg.up{color:var(--green);}
+.wl-chg.dn{color:var(--red);}
+.wl-section{padding:5px 12px 2px;font-family:'Space Mono',monospace;font-size:8px;color:var(--border3);letter-spacing:.14em;text-transform:uppercase;}
+
+/* ═══════════════════════ CHART AREA ═══════════════════════ */
+#chartarea{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#chartContainer{flex:1;position:relative;overflow:hidden;}
+#chartCanvas{width:100%;height:100%;}
+
+/* Chart overlay info */
+#chartOverlay{position:absolute;top:10px;left:10px;pointer-events:none;z-index:10;}
+.co-sym{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:rgba(255,255,255,.08);}
+.co-tf{font-family:'Space Mono',monospace;font-size:11px;color:rgba(201,168,76,.3);margin-top:2px;}
+
+/* Crosshair OHLC */
+#crosshairInfo{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.85);border:1px solid var(--border2);padding:8px 12px;font-family:'Space Mono',monospace;font-size:10px;pointer-events:none;z-index:10;display:none;}
+.ci-row{display:flex;gap:12px;}
+.ci-item{display:flex;gap:4px;}
+.ci-label{color:var(--muted);}
+.ci-up{color:var(--green);}
+.ci-dn{color:var(--red);}
+.ci-val{color:var(--text);}
+
+/* Bottom panels (RSI / MACD) */
+#bottomPanels{display:flex;flex-direction:column;border-top:1px solid var(--border);flex-shrink:0;}
+.bottom-panel{position:relative;border-bottom:1px solid var(--border);}
+.bp-label{position:absolute;top:4px;left:8px;font-family:'Space Mono',monospace;font-size:8px;color:rgba(201,168,76,.5);letter-spacing:.1em;text-transform:uppercase;z-index:5;pointer-events:none;}
+.bp-close{position:absolute;top:4px;right:8px;background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;z-index:5;padding:2px 5px;}
+.bp-close:hover{color:var(--red);}
+
+/* Drawing canvas */
+#drawCanvas{position:absolute;inset:0;z-index:20;cursor:crosshair;}
+#drawCanvas.cursor-pointer{cursor:pointer;}
+#drawCanvas.cursor-move{cursor:move;}
+#drawCanvas.cursor-default{cursor:default;}
+
+/* ═══════════════════════ SYMBOL SEARCH MODAL ═══════════════════════ */
+#symbolModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-start;justify-content:center;padding-top:80px;}
+#symbolModal.open{display:flex;}
+.sm-box{background:var(--card);border:1px solid var(--border2);width:100%;max-width:560px;max-height:70vh;display:flex;flex-direction:column;}
+.sm-search{display:flex;align-items:center;border-bottom:1px solid var(--border);padding:0 16px;gap:10px;}
+.sm-search-icon{color:var(--muted);font-size:14px;}
+.sm-input{flex:1;background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;padding:14px 0;outline:none;}
+.sm-input::placeholder{color:var(--muted);}
+.sm-cats{display:flex;gap:2px;padding:8px 10px;border-bottom:1px solid var(--border);overflow-x:auto;}
+.sm-cat{background:none;border:1px solid var(--border2);color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.sm-cat.active,.sm-cat:hover{border-color:var(--gold);color:var(--gold);}
+.sm-results{flex:1;overflow-y:auto;}
+.sm-section-title{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;padding:10px 16px 4px;}
+.sm-result{display:flex;align-items:center;padding:9px 16px;cursor:pointer;transition:background .15s;gap:10px;}
+.sm-result:hover{background:rgba(255,255,255,.03);}
+.sm-r-sym{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#fff;width:90px;}
+.sm-r-name{font-size:13px;color:var(--muted);flex:1;}
+.sm-r-cat{font-family:'Space Mono',monospace;font-size:8px;color:var(--border3);background:var(--dim);padding:2px 7px;}
+
+/* ═══════════════════════ INDICATOR MODAL ═══════════════════════ */
+#indModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-start;justify-content:center;padding-top:80px;}
+#indModal.open{display:flex;}
+.im-box{background:var(--card);border:1px solid var(--border2);width:100%;max-width:500px;max-height:65vh;display:flex;flex-direction:column;}
+.im-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#fff;padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.im-close{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;}
+.im-close:hover{color:var(--red);}
+.im-list{flex:1;overflow-y:auto;padding:8px 0;}
+.im-item{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;cursor:pointer;transition:background .15s;}
+.im-item:hover{background:rgba(255,255,255,.02);}
+.im-item-info{flex:1;}
+.im-item-name{font-size:14px;font-weight:600;color:var(--text);}
+.im-item-desc{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.im-toggle{width:34px;height:18px;border-radius:9px;border:1px solid var(--border2);background:var(--dim);position:relative;cursor:pointer;transition:all .3s;flex-shrink:0;}
+.im-toggle.on{background:rgba(201,168,76,.2);border-color:var(--gold);}
+.im-toggle::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:var(--muted);top:2px;left:2px;transition:all .3s;}
+.im-toggle.on::after{background:var(--gold);left:18px;}
+
+/* ═══════════════════════ TOOLTIP / CONTEXT MENU ═══════════════════════ */
+#contextMenu{display:none;position:fixed;background:var(--card);border:1px solid var(--border2);z-index:600;min-width:140px;}
+.ctx-item{padding:8px 14px;font-size:12px;cursor:pointer;transition:background .15s;color:var(--text);}
+.ctx-item:hover{background:var(--dim);}
+.ctx-item.danger{color:var(--red);}
+
+/* ═══════════════════════ STATUS BAR ═══════════════════════ */
+#statusbar{height:22px;background:#000;border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:16px;flex-shrink:0;}
+.sb-item{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--green);}
+.sb-dot.loading{background:var(--gold);animation:pulse 1s infinite;}
+.sb-dot.error{background:var(--red);}
+
+/* ═══════════════════════ LOADING ═══════════════════════ */
+#loadingOverlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:50;}
+.loading-box{text-align:center;}
+.loading-sym{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.loading-bar{width:120px;height:2px;background:var(--border2);margin:0 auto;}
+.loading-fill{height:100%;background:var(--gold);animation:loadbar 1.5s infinite;}
+@keyframes loadbar{0%{width:0}50%{width:100%}100%{width:0}}
+
+/* ═══════════════════════ SCROLLBAR ═══════════════════════ */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Mobile */
+@media(max-width:768px){
+  :root{--watchlist:0px;}
+  #watchlist{display:none;}
+  .tb-ohlc{display:none;}
+  .tf-group{gap:0;}
+  .tf-btn{padding:4px 6px;font-size:9px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<div id="topbar">
+  <div>
+    <div class="tb-logo">Biddy<em>FX</em></div>
+    <div class="tb-logo-sub">Chart Terminal</div>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Symbol selector -->
+  <div class="tb-symbol" onclick="openSymbolModal()">
+    <div>
+      <div class="tb-sym-name" id="tbSymName">EUR/USD</div>
+      <div class="tb-sym-cat" id="tbSymCat">Forex</div>
+    </div>
+    <span class="tb-sym-arrow">▾</span>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Price -->
+  <div class="tb-price">
+    <span class="tb-price-val" id="tbPrice">—</span>
+    <span class="tb-price-chg" id="tbChg">—</span>
+  </div>
+  <div class="tb-ohlc" id="tbOHLC">
+    <span>O <b id="tbO">—</b></span>
+    <span>H <b id="tbH">—</b></span>
+    <span>L <b id="tbL">—</b></span>
+    <span>C <b id="tbC">—</b></span>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Timeframes -->
+  <div class="tf-group" id="tfGroup">
+    <button class="tf-btn" onclick="setTF('1',this)">1m</button>
+    <button class="tf-btn" onclick="setTF('5',this)">5m</button>
+    <button class="tf-btn" onclick="setTF('15',this)">15m</button>
+    <button class="tf-btn" onclick="setTF('30',this)">30m</button>
+    <button class="tf-btn active" onclick="setTF('60',this)">1H</button>
+    <button class="tf-btn" onclick="setTF('240',this)">4H</button>
+    <button class="tf-btn" onclick="setTF('D',this)">D</button>
+    <button class="tf-btn" onclick="setTF('W',this)">W</button>
+    <button class="tf-btn" onclick="setTF('M',this)">M</button>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Chart type -->
+  <div class="ct-group">
+    <button class="ct-btn active" title="Candlestick" onclick="setChartType('candlestick',this)">🕯</button>
+    <button class="ct-btn" title="Bar" onclick="setChartType('bar',this)">▦</button>
+    <button class="ct-btn" title="Line" onclick="setChartType('line',this)">╱</button>
+    <button class="ct-btn" title="Area" onclick="setChartType('area',this)">◿</button>
+    <button class="ct-btn" title="Baseline" onclick="setChartType('baseline',this)">⊟</button>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Indicators btn -->
+  <button class="ind-btn" onclick="openIndModal()">⊕ Indicators</button>
+
+  <div class="tb-spacer"></div>
+
+  <!-- Nav -->
+  <div class="tb-nav">
+    <a href="index.html" class="tb-nav-link">Home</a>
+    <a href="dashboard.html" class="tb-nav-link">Dashboard</a>
+    <a href="login.html" class="tb-nav-link">Login</a>
+  </div>
+</div>
+
+<!-- ═══ DRAWING TOOLBAR ═══ -->
+<div id="drawtoolbar">
+  <span class="dt-label">Cursor</span>
+  <div class="dt-group">
+    <button class="dt-btn active" id="toolCursor" onclick="setTool('cursor')" title="Cursor / Select">↖</button>
+    <button class="dt-btn" id="toolCrosshair" onclick="setTool('crosshair')" title="Crosshair">⊕</button>
+  </div>
+
+  <span class="dt-label">Lines</span>
+  <div class="dt-group">
+    <button class="dt-btn" id="toolTrendline" onclick="setTool('trendline')" title="Trendline">╱</button>
+    <button class="dt-btn" id="toolHline" onclick="setTool('hline')" title="Horizontal Line">—</button>
+    <button class="dt-btn" id="toolVline" onclick="setTool('vline')" title="Vertical Line">|</button>
+    <button class="dt-btn" id="toolRay" onclick="setTool('ray')" title="Ray →">→</button>
+    <button class="dt-btn" id="toolExtended" onclick="setTool('extended')" title="Extended Line">↔</button>
+    <button class="dt-btn" id="toolChannel" onclick="setTool('channel')" title="Parallel Channel">⫼</button>
+  </div>
+
+  <span class="dt-label">Shapes</span>
+  <div class="dt-group">
+    <button class="dt-btn" id="toolRect" onclick="setTool('rect')" title="Rectangle / S&R Zone">▭</button>
+    <button class="dt-btn" id="toolEllipse" onclick="setTool('ellipse')" title="Ellipse">◯</button>
+    <button class="dt-btn" id="toolTriangle" onclick="setTool('triangle')" title="Triangle">△</button>
+    <button class="dt-btn" id="toolArrow" onclick="setTool('arrow')" title="Arrow">➤</button>
+  </div>
+
+  <span class="dt-label">Fib</span>
+  <div class="dt-group">
+    <button class="dt-btn" id="toolFib" onclick="setTool('fib')" title="Fibonacci Retracement">Fib</button>
+    <button class="dt-btn" id="toolFibExt" onclick="setTool('fibext')" title="Fibonacci Extension">Ext</button>
+    <button class="dt-btn" id="toolFibFan" onclick="setTool('fibfan')" title="Fibonacci Fan">Fan</button>
+  </div>
+
+  <span class="dt-label">Measure</span>
+  <div class="dt-group">
+    <button class="dt-btn" id="toolMeasure" onclick="setTool('measure')" title="Measure Tool">⟺</button>
+    <button class="dt-btn" id="toolPitchfork" onclick="setTool('pitchfork')" title="Andrews Pitchfork">⑁</button>
+  </div>
+
+  <span class="dt-label">Text</span>
+  <div class="dt-group">
+    <button class="dt-btn" id="toolText" onclick="setTool('text')" title="Text Label">T</button>
+    <button class="dt-btn" id="toolCallout" onclick="setTool('callout')" title="Callout">💬</button>
+    <button class="dt-btn" id="toolFlag" onclick="setTool('flag')" title="Flag">⚑</button>
+  </div>
+
+  <span class="dt-label">Style</span>
+  <div class="dt-group">
+    <input type="color" class="dt-color" id="drawColor" value="#C9A84C" title="Drawing color" onchange="updateDrawStyle()">
+    <input type="number" class="dt-thickness" id="drawWidth" value="1" min="1" max="5" title="Line width" onchange="updateDrawStyle()">
+    <button class="dt-btn" id="dashToggle" onclick="toggleDash()" title="Dashed line">╌</button>
+    <button class="dt-btn" id="fillToggle" onclick="toggleFill()" title="Fill shape">▨</button>
+  </div>
+
+  <button class="clear-btn" onclick="clearDrawings()">✕ Clear All</button>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+
+  <!-- Watchlist -->
+  <div id="watchlist">
+    <div class="wl-header">
+      <span class="wl-title">Watchlist</span>
+    </div>
+    <input type="text" class="wl-search" id="wlSearch" placeholder="Search symbol…" oninput="filterWatchlist(this.value)">
+    <div class="wl-cats" id="wlCats">
+      <button class="wl-cat active" onclick="filterWlCat('all',this)">All</button>
+      <button class="wl-cat" onclick="filterWlCat('forex',this)">FX</button>
+      <button class="wl-cat" onclick="filterWlCat('crypto',this)">Crypto</button>
+      <button class="wl-cat" onclick="filterWlCat('metals',this)">Metals</button>
+      <button class="wl-cat" onclick="filterWlCat('stocks',this)">Stocks</button>
+      <button class="wl-cat" onclick="filterWlCat('indices',this)">Indices</button>
+    </div>
+    <div class="wl-list" id="wlList"></div>
+  </div>
+
+  <!-- Chart Area -->
+  <div id="chartarea">
+    <div id="chartContainer">
+      <div id="chartCanvas"></div>
+      <canvas id="drawCanvas"></canvas>
+      <div id="chartOverlay">
+        <div class="co-sym" id="overlaySymbol">EUR/USD</div>
+        <div class="co-tf" id="overlayTF">1H · BiddyFX</div>
+      </div>
+      <div id="crosshairInfo">
+        <div class="ci-row">
+          <div class="ci-item"><span class="ci-label">O</span><span class="ci-val" id="ciO">—</span></div>
+          <div class="ci-item"><span class="ci-label">H</span><span class="ci-up" id="ciH">—</span></div>
+          <div class="ci-item"><span class="ci-label">L</span><span class="ci-dn" id="ciL">—</span></div>
+          <div class="ci-item"><span class="ci-label">C</span><span class="ci-val" id="ciC">—</span></div>
+          <div class="ci-item"><span class="ci-label">V</span><span class="ci-val" id="ciV">—</span></div>
+        </div>
+      </div>
+      <div id="loadingOverlay">
+        <div class="loading-box">
+          <div class="loading-sym" id="loadingSymText">EUR/USD</div>
+          <div class="loading-bar"><div class="loading-fill"></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="bottomPanels"></div>
+  </div>
+</div>
+
+<!-- ═══ STATUS BAR ═══ -->
+<div id="statusbar">
+  <div class="sb-item"><div class="sb-dot" id="statusDot"></div><span id="statusText">Connecting…</span></div>
+  <div class="sb-item">Powered by BiddyFX</div>
+  <div class="sb-item" id="sbDrawMode" style="display:none;color:var(--gold);">✏ Drawing Mode</div>
+  <div class="sb-item" id="sbDrawCount"></div>
+</div>
+
+<!-- ═══ SYMBOL MODAL ═══ -->
+<div id="symbolModal" onclick="if(event.target===this)closeSymbolModal()">
+  <div class="sm-box">
+    <div class="sm-search">
+      <span class="sm-search-icon">🔍</span>
+      <input type="text" class="sm-input" id="smInput" placeholder="Search symbol, e.g. EURUSD, BTC, AAPL…" oninput="filterSymbols(this.value)">
+    </div>
+    <div class="sm-cats">
+      <button class="sm-cat active" onclick="filterSmCat('all',this)">All</button>
+      <button class="sm-cat" onclick="filterSmCat('forex',this)">Forex</button>
+      <button class="sm-cat" onclick="filterSmCat('crypto',this)">Crypto</button>
+      <button class="sm-cat" onclick="filterSmCat('metals',this)">Metals</button>
+      <button class="sm-cat" onclick="filterSmCat('stocks',this)">Stocks</button>
+      <button class="sm-cat" onclick="filterSmCat('indices',this)">Indices</button>
+      <button class="sm-cat" onclick="filterSmCat('energy',this)">Energy</button>
+    </div>
+    <div class="sm-results" id="smResults"></div>
+  </div>
+</div>
+
+<!-- ═══ INDICATOR MODAL ═══ -->
+<div id="indModal" onclick="if(event.target===this)closeIndModal()">
+  <div class="im-box">
+    <div class="im-title">
+      <span>Indicators</span>
+      <button class="im-close" onclick="closeIndModal()">✕</button>
+    </div>
+    <div class="im-list" id="imList"></div>
+  </div>
+</div>
+
+<!-- ═══ CONTEXT MENU ═══ -->
+<div id="contextMenu">
+  <div class="ctx-item" onclick="ctxEdit()">✏ Edit</div>
+  <div class="ctx-item" onclick="ctxDuplicate()">⧉ Duplicate</div>
+  <div class="ctx-item" onclick="ctxChangeColor()">🎨 Change Color</div>
+  <div class="ctx-item danger" onclick="ctxDelete()">✕ Delete</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA — Symbols
+// ═══════════════════════════════════════════════════════════════
+const SYMBOLS = [
+  // FOREX
+  {sym:'EURUSD',name:'Euro / US Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'GBPUSD',name:'British Pound / US Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'USDJPY',name:'US Dollar / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'GBPJPY',name:'British Pound / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'EURJPY',name:'Euro / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'AUDUSD',name:'Australian Dollar / US Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'USDCHF',name:'US Dollar / Swiss Franc',cat:'forex',dec:5,pip:0.0001},
+  {sym:'USDCAD',name:'US Dollar / Canadian Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'NZDUSD',name:'New Zealand Dollar / US Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'EURGBP',name:'Euro / British Pound',cat:'forex',dec:5,pip:0.0001},
+  {sym:'EURAUD',name:'Euro / Australian Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'EURCAD',name:'Euro / Canadian Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'EURCHF',name:'Euro / Swiss Franc',cat:'forex',dec:5,pip:0.0001},
+  {sym:'GBPAUD',name:'British Pound / Australian Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'GBPCAD',name:'British Pound / Canadian Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'GBPCHF',name:'British Pound / Swiss Franc',cat:'forex',dec:5,pip:0.0001},
+  {sym:'AUDJPY',name:'Australian Dollar / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'CADJPY',name:'Canadian Dollar / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'CHFJPY',name:'Swiss Franc / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'NZDJPY',name:'New Zealand Dollar / Japanese Yen',cat:'forex',dec:3,pip:0.01},
+  {sym:'AUDCAD',name:'Australian Dollar / Canadian Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'AUDCHF',name:'Australian Dollar / Swiss Franc',cat:'forex',dec:5,pip:0.0001},
+  {sym:'AUDNZD',name:'Australian Dollar / New Zealand Dollar',cat:'forex',dec:5,pip:0.0001},
+  {sym:'USDNGN',name:'US Dollar / Nigerian Naira',cat:'forex',dec:2,pip:0.01},
+  {sym:'USDZAR',name:'US Dollar / South African Rand',cat:'forex',dec:5,pip:0.0001},
+  // METALS
+  {sym:'XAUUSD',name:'Gold / US Dollar',cat:'metals',dec:2,pip:0.01},
+  {sym:'XAGUSD',name:'Silver / US Dollar',cat:'metals',dec:4,pip:0.001},
+  {sym:'XPTUSD',name:'Platinum / US Dollar',cat:'metals',dec:2,pip:0.01},
+  {sym:'XPDUSD',name:'Palladium / US Dollar',cat:'metals',dec:2,pip:0.01},
+  {sym:'XCUUSD',name:'Copper / US Dollar',cat:'metals',dec:4,pip:0.001},
+  // CRYPTO
+  {sym:'BTCUSD',name:'Bitcoin / US Dollar',cat:'crypto',dec:2,pip:1},
+  {sym:'ETHUSD',name:'Ethereum / US Dollar',cat:'crypto',dec:2,pip:0.01},
+  {sym:'BNBUSD',name:'Binance Coin / US Dollar',cat:'crypto',dec:2,pip:0.01},
+  {sym:'SOLUSD',name:'Solana / US Dollar',cat:'crypto',dec:2,pip:0.01},
+  {sym:'XRPUSD',name:'Ripple / US Dollar',cat:'crypto',dec:5,pip:0.0001},
+  {sym:'ADAUSD',name:'Cardano / US Dollar',cat:'crypto',dec:5,pip:0.0001},
+  {sym:'DOTUSD',name:'Polkadot / US Dollar',cat:'crypto',dec:3,pip:0.001},
+  {sym:'LINKUSD',name:'Chainlink / US Dollar',cat:'crypto',dec:3,pip:0.001},
+  {sym:'LTCUSD',name:'Litecoin / US Dollar',cat:'crypto',dec:2,pip:0.01},
+  {sym:'AVAXUSD',name:'Avalanche / US Dollar',cat:'crypto',dec:2,pip:0.01},
+  // INDICES
+  {sym:'US30',name:'Dow Jones Industrial Average',cat:'indices',dec:1,pip:1},
+  {sym:'SPX500',name:'S&P 500 Index',cat:'indices',dec:1,pip:0.1},
+  {sym:'NAS100',name:'NASDAQ 100 Index',cat:'indices',dec:1,pip:0.1},
+  {sym:'UK100',name:'FTSE 100 Index',cat:'indices',dec:1,pip:0.1},
+  {sym:'GER40',name:'DAX 40 Index',cat:'indices',dec:1,pip:0.1},
+  {sym:'JP225',name:'Nikkei 225 Index',cat:'indices',dec:0,pip:1},
+  {sym:'AUS200',name:'ASX 200 Index',cat:'indices',dec:1,pip:0.1},
+  {sym:'VIX',name:'Volatility Index (VIX)',cat:'indices',dec:2,pip:0.01},
+  {sym:'USDX',name:'US Dollar Index (DXY)',cat:'indices',dec:3,pip:0.001},
+  // STOCKS (major)
+  {sym:'AAPL',name:'Apple Inc.',cat:'stocks',dec:2,pip:0.01},
+  {sym:'MSFT',name:'Microsoft Corporation',cat:'stocks',dec:2,pip:0.01},
+  {sym:'GOOGL',name:'Alphabet Inc.',cat:'stocks',dec:2,pip:0.01},
+  {sym:'AMZN',name:'Amazon.com Inc.',cat:'stocks',dec:2,pip:0.01},
+  {sym:'TSLA',name:'Tesla Inc.',cat:'stocks',dec:2,pip:0.01},
+  {sym:'NVDA',name:'NVIDIA Corporation',cat:'stocks',dec:2,pip:0.01},
+  {sym:'META',name:'Meta Platforms Inc.',cat:'stocks',dec:2,pip:0.01},
+  {sym:'BRK',name:'Berkshire Hathaway',cat:'stocks',dec:0,pip:1},
+  {sym:'JPM',name:'JPMorgan Chase',cat:'stocks',dec:2,pip:0.01},
+  {sym:'V',name:'Visa Inc.',cat:'stocks',dec:2,pip:0.01},
+  // ENERGY
+  {sym:'USOIL',name:'WTI Crude Oil',cat:'energy',dec:2,pip:0.01},
+  {sym:'UKOIL',name:'Brent Crude Oil',cat:'energy',dec:2,pip:0.01},
+  {sym:'NATGAS',name:'Natural Gas',cat:'energy',dec:3,pip:0.001},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let chart, mainSeries, volumeSeries;
+let rsiChart, rsiSeries;
+let macdChart, macdFastSeries, macdSlowSeries, macdHistSeries;
+let emaSeries = {}, smaSeries = {}, bbSeries = {};
+let currentSymbol = SYMBOLS[0];
+let currentTF = '60';
+let currentChartType = 'candlestick';
+let currentTool = 'cursor';
+let rawCandles = [];
+let drawColor = '#C9A84C';
+let drawWidth = 1;
+let drawDash = false;
+let drawFill = false;
+let drawings = [];
+let activeDrawing = null;
+let drawingPoints = [];
+let hoveredDrawing = null;
+let selectedDrawing = null;
+let isDragging = false;
+let dragOffset = { x: 0, y: 0 };
+let wlFilter = 'all';
+let smFilter = 'all';
+let indicators = {
+  ema20: false, ema50: false, ema200: false,
+  sma20: false, sma50: false,
+  bb: false, rsi: false, macd: false, volume: true,
+  vwap: false, atr: false, stoch: false, cci: false
+};
+let wlPrices = {};
+
+// ═══════════════════════════════════════════════════════════════
+// CHART INIT
+// ═══════════════════════════════════════════════════════════════
+function initChart() {
+  const container = document.getElementById('chartCanvas');
+  chart = LightweightCharts.createChart(container, {
+    width: container.clientWidth,
+    height: container.clientHeight,
+    layout: {
+      background: { type: 'solid', color: '#000000' },
+      textColor: '#444444',
+      fontFamily: "'Space Mono', monospace",
+      fontSize: 10,
+    },
+    grid: {
+      vertLines: { color: '#0e0e0e', style: 1 },
+      horzLines: { color: '#0e0e0e', style: 1 },
+    },
+    crosshair: {
+      mode: LightweightCharts.CrosshairMode.Normal,
+      vertLine: { color: '#333', width: 1, style: 2, labelBackgroundColor: '#111' },
+      horzLine: { color: '#333', width: 1, style: 2, labelBackgroundColor: '#111' },
+    },
+    rightPriceScale: {
+      borderColor: '#181818',
+      textColor: '#555',
+    },
+    timeScale: {
+      borderColor: '#181818',
+      textColor: '#555',
+      timeVisible: true,
+      secondsVisible: false,
+    },
+    watermark: { visible: false },
+    handleScroll: { mouseWheel: true, pressedMouseMove: true },
+    handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+  });
+
+  createMainSeries();
+
+  // Crosshair move
+  chart.subscribeCrosshairMove(param => {
+    if (!param.time || !param.seriesData) {
+      document.getElementById('crosshairInfo').style.display = 'none';
+      return;
+    }
+    const d = param.seriesData.get(mainSeries);
+    if (!d) return;
+    document.getElementById('crosshairInfo').style.display = 'block';
+    document.getElementById('ciO').textContent = fmt(d.open);
+    document.getElementById('ciH').textContent = fmt(d.high);
+    document.getElementById('ciL').textContent = fmt(d.low);
+    document.getElementById('ciC').textContent = fmt(d.close || d.value);
+    document.getElementById('ciV').textContent = d.value ? '' : '';
+  });
+
+  // Resize
+  const ro = new ResizeObserver(() => {
+    chart.resize(container.clientWidth, container.clientHeight);
+    resizeDrawCanvas();
+    redrawAll();
+  });
+  ro.observe(container);
+
+  // Draw canvas
+  setupDrawCanvas();
+  loadSymbol(currentSymbol);
+  buildWatchlist();
+  buildIndModal();
+  renderSmResults('');
+}
+
+function createMainSeries() {
+  if (mainSeries) { try { chart.removeSeries(mainSeries); } catch(e){} }
+  if (volumeSeries) { try { chart.removeSeries(volumeSeries); } catch(e){} }
+
+  if (currentChartType === 'candlestick') {
+    mainSeries = chart.addCandlestickSeries({
+      upColor: '#00C896', downColor: '#FF4444',
+      borderUpColor: '#00C896', borderDownColor: '#FF4444',
+      wickUpColor: '#00C896', wickDownColor: '#FF4444',
+    });
+  } else if (currentChartType === 'bar') {
+    mainSeries = chart.addBarSeries({ upColor: '#00C896', downColor: '#FF4444' });
+  } else if (currentChartType === 'line') {
+    mainSeries = chart.addLineSeries({ color: '#C9A84C', lineWidth: 2 });
+  } else if (currentChartType === 'area') {
+    mainSeries = chart.addAreaSeries({
+      lineColor: '#C9A84C', topColor: 'rgba(201,168,76,.25)',
+      bottomColor: 'rgba(201,168,76,.02)', lineWidth: 2,
+    });
+  } else if (currentChartType === 'baseline') {
+    mainSeries = chart.addBaselineSeries({
+      topLineColor: '#00C896', topFillColor1: 'rgba(0,200,150,.15)',
+      topFillColor2: 'rgba(0,200,150,.02)',
+      bottomLineColor: '#FF4444', bottomFillColor1: 'rgba(255,68,68,.02)',
+      bottomFillColor2: 'rgba(255,68,68,.15)',
+    });
+  }
+
+  volumeSeries = chart.addHistogramSeries({
+    color: '#1a1a1a', priceFormat: { type: 'volume' },
+    priceScaleId: 'vol',
+  });
+  chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA LOADING — Twelve Data API
+// ═══════════════════════════════════════════════════════════════
+const API_KEY = '6be180b804c047c7a33511e52a93ab05';
+
+// Symbol → Twelve Data format
+function toTwelveSymbol(sym) {
+  const forexBase = ['EUR','GBP','USD','AUD','NZD','CAD','CHF','JPY','XAU','XAG','XPT','XPD'];
+  const raw = sym.replace('/','').replace('-','').toUpperCase();
+  for (const base of forexBase) {
+    if (raw.startsWith(base) && raw.length <= 8) {
+      const quote = raw.slice(base.length);
+      if (forexBase.includes(quote)) return base + '/' + quote;
+    }
+  }
+  return sym;
+}
+
+// Interval → Twelve Data interval string
+function toTwelveInterval(tf) {
+  const map = {
+    '1':'1min', '5':'5min', '15':'15min', '30':'30min',
+    '60':'1h', '240':'4h', 'D':'1day', 'W':'1week', 'M':'1month'
+  };
+  return map[tf] || '1h';
+}
+
+async function loadSymbol(sym) {
+  showLoading(true, sym.sym);
+  currentSymbol = sym;
+  document.getElementById('tbSymName').textContent = fmtSym(sym.sym);
+  document.getElementById('tbSymCat').textContent = sym.cat.charAt(0).toUpperCase() + sym.cat.slice(1);
+  document.getElementById('overlaySymbol').textContent = fmtSym(sym.sym);
+  document.getElementById('overlayTF').textContent = tfLabel(currentTF) + ' · BiddyFX';
+  document.getElementById('loadingSymText').textContent = fmtSym(sym.sym);
+  setStatus('loading', 'Loading ' + fmtSym(sym.sym) + '...');
+
+  const data = await fetchCandles(sym);
+  if (data && data.length > 0) {
+    rawCandles = data;
+    setChartData(data);
+    updateTopbarPrice(data[data.length-1]);
+    setStatus('ok', fmtSym(sym.sym) + ' · ' + data.length + ' bars · ' + tfLabel(currentTF));
+  } else {
+    loadDemoData(sym);
+  }
+  showLoading(false);
+  updateAllIndicators();
+}
+
+async function fetchCandles(sym) {
+  const tdSym = toTwelveSymbol(sym.sym);
+  const tdInterval = toTwelveInterval(currentTF);
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(tdSym)}&interval=${tdInterval}&outputsize=300&apikey=${API_KEY}&format=JSON`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.code && json.code !== 200) { console.warn('TwelveData:', json.message); return null; }
+    if (!json.values || !Array.isArray(json.values)) return null;
+    return json.values.reverse().map(v => ({
+      time:   Math.floor(new Date(v.datetime).getTime() / 1000),
+      open:   parseFloat(v.open),
+      high:   parseFloat(v.high),
+      low:    parseFloat(v.low),
+      close:  parseFloat(v.close),
+      volume: parseFloat(v.volume || 0),
+    })).filter(c => !isNaN(c.open) && c.time > 0);
+  } catch(e) {
+    console.error('Fetch error:', e);
+    return null;
+  }
+}
+
+// Fallback demo data (realistic price generation)
+function loadDemoData(sym) {
+  const seeds = {
+    'EURUSD':1.0850,'GBPUSD':1.2650,'USDJPY':148.50,'GBPJPY':187.80,
+    'XAUUSD':2050,'BTCUSD':67000,'ETHUSD':3500,'US30':38500,'SPX500':5100,'NAS100':18000,
+    'AUDUSD':0.6550,'USDCHF':0.9050,'USDCAD':1.3550,'EURJPY':161.20,
+    'USOIL':78.50,'XAGUSD':24.50,'VIX':18.5,'USDX':104.2,
+  };
+  let base = seeds[sym.sym] || 1.0000;
+  const candles = [];
+  const now = Math.floor(Date.now()/1000);
+  const step = {'1':60,'5':300,'15':900,'30':1800,'60':3600,'240':14400,'D':86400,'W':604800,'M':2592000}[currentTF]||3600;
+  let price = base;
+  const vol = base * 0.002;
+
+  for (let i = 299; i >= 0; i--) {
+    const t = now - i * step;
+    const o = price;
+    const change = (Math.random() - 0.495) * vol;
+    const h = o + Math.abs(change) * (1 + Math.random());
+    const l = o - Math.abs(change) * (1 + Math.random());
+    const c = o + change;
+    price = c;
+    candles.push({ time: t, open: parseFloat(o.toFixed(sym.dec)), high: parseFloat(h.toFixed(sym.dec)), low: parseFloat(l.toFixed(sym.dec)), close: parseFloat(c.toFixed(sym.dec)), volume: Math.floor(Math.random() * 5000 + 500) });
+  }
+  rawCandles = candles;
+  setChartData(candles);
+  updateTopbarPrice(candles[candles.length-1]);
+  setStatus('ok', fmtSym(sym.sym) + ' · Demo data · ' + tfLabel(currentTF));
+}
+
+function setChartData(candles) {
+  const isLine = currentChartType === 'line' || currentChartType === 'area' || currentChartType === 'baseline';
+  if (isLine) {
+    mainSeries.setData(candles.map(c => ({ time: c.time, value: c.close })));
+  } else {
+    mainSeries.setData(candles);
+  }
+  if (indicators.volume && volumeSeries) {
+    volumeSeries.setData(candles.map(c => ({
+      time: c.time, value: c.volume,
+      color: c.close >= c.open ? 'rgba(0,200,150,.18)' : 'rgba(255,68,68,.18)',
+    })));
+  }
+}
+
+function updateTopbarPrice(candle) {
+  if (!candle) return;
+  const price = candle.close || candle.value;
+  const open = rawCandles.length > 1 ? rawCandles[0].close : price;
+  const chg = price - open;
+  const chgPct = ((chg / open) * 100).toFixed(2);
+  const el = document.getElementById('tbPrice');
+  el.textContent = fmt(price);
+  el.style.color = chg >= 0 ? 'var(--green)' : 'var(--red)';
+  const chgEl = document.getElementById('tbChg');
+  chgEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(currentSymbol.dec) + ' (' + (chg >= 0 ? '+' : '') + chgPct + '%)';
+  chgEl.className = 'tb-price-chg ' + (chg >= 0 ? 'up' : 'dn');
+  document.getElementById('tbO').textContent = fmt(rawCandles[rawCandles.length-1]?.open || price);
+  document.getElementById('tbH').textContent = fmt(rawCandles[rawCandles.length-1]?.high || price);
+  document.getElementById('tbL').textContent = fmt(rawCandles[rawCandles.length-1]?.low || price);
+  document.getElementById('tbC').textContent = fmt(price);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INDICATORS
+// ═══════════════════════════════════════════════════════════════
+function updateAllIndicators() {
+  if (!rawCandles.length) return;
+  updateEMAs();
+  updateBB();
+  updateRSI();
+  updateMACD();
+  updateVolume();
+}
+
+function calcEMA(data, period) {
+  const k = 2 / (period + 1);
+  let ema = data[0].close;
+  return data.map((d, i) => {
+    if (i === 0) { ema = d.close; return { time: d.time, value: ema }; }
+    ema = d.close * k + ema * (1 - k);
+    return { time: d.time, value: parseFloat(ema.toFixed(currentSymbol.dec)) };
+  });
+}
+
+function calcSMA(data, period) {
+  return data.map((d, i) => {
+    if (i < period - 1) return { time: d.time, value: null };
+    const sum = data.slice(i - period + 1, i + 1).reduce((a, c) => a + c.close, 0);
+    return { time: d.time, value: parseFloat((sum / period).toFixed(currentSymbol.dec)) };
+  }).filter(d => d.value !== null);
+}
+
+function updateEMAs() {
+  const pairs = [
+    { key: 'ema20', period: 20, color: '#F0D080' },
+    { key: 'ema50', period: 50, color: '#4A9EFF' },
+    { key: 'ema200', period: 200, color: '#FF8C00' },
+    { key: 'sma20', period: 20, color: '#A0A0FF', sma: true },
+    { key: 'sma50', period: 50, color: '#FF80C0', sma: true },
+  ];
+  pairs.forEach(({ key, period, color, sma }) => {
+    if (emaSeries[key]) { try { chart.removeSeries(emaSeries[key]); } catch(e){} emaSeries[key] = null; }
+    if (indicators[key] && rawCandles.length > period) {
+      emaSeries[key] = chart.addLineSeries({ color, lineWidth: 1, lastValueVisible: true, priceLineVisible: false });
+      emaSeries[key].setData(sma ? calcSMA(rawCandles, period) : calcEMA(rawCandles, period));
+    }
+  });
+}
+
+function calcBB(data, period=20, mult=2) {
+  const result = { upper:[], mid:[], lower:[] };
+  for (let i = period-1; i < data.length; i++) {
+    const slice = data.slice(i-period+1, i+1);
+    const mean = slice.reduce((a,c)=>a+c.close,0)/period;
+    const variance = slice.reduce((a,c)=>a+Math.pow(c.close-mean,2),0)/period;
+    const std = Math.sqrt(variance);
+    const t = data[i].time;
+    const dec = currentSymbol.dec;
+    result.upper.push({time:t,value:parseFloat((mean+mult*std).toFixed(dec))});
+    result.mid.push({time:t,value:parseFloat(mean.toFixed(dec))});
+    result.lower.push({time:t,value:parseFloat((mean-mult*std).toFixed(dec))});
+  }
+  return result;
+}
+
+function updateBB() {
+  ['bbU','bbM','bbL'].forEach(k=>{if(bbSeries[k]){try{chart.removeSeries(bbSeries[k]);}catch(e){}bbSeries[k]=null;}});
+  if (!indicators.bb || rawCandles.length < 20) return;
+  const bb = calcBB(rawCandles);
+  bbSeries.bbU = chart.addLineSeries({color:'rgba(74,158,255,.5)',lineWidth:1,priceLineVisible:false,lastValueVisible:false});
+  bbSeries.bbM = chart.addLineSeries({color:'rgba(74,158,255,.3)',lineWidth:1,priceLineVisible:false,lastValueVisible:false,lineStyle:2});
+  bbSeries.bbL = chart.addLineSeries({color:'rgba(74,158,255,.5)',lineWidth:1,priceLineVisible:false,lastValueVisible:false});
+  bbSeries.bbU.setData(bb.upper);
+  bbSeries.bbM.setData(bb.mid);
+  bbSeries.bbL.setData(bb.lower);
+}
+
+function calcRSI(data, period=14) {
+  const result = [];
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const diff = data[i].close - data[i-1].close;
+    if (diff > 0) gains += diff; else losses -= diff;
+  }
+  let avgGain = gains/period, avgLoss = losses/period;
+  for (let i = period; i < data.length; i++) {
+    const diff = data[i].close - data[i-1].close;
+    avgGain = (avgGain*(period-1) + Math.max(0,diff)) / period;
+    avgLoss = (avgLoss*(period-1) + Math.max(0,-diff)) / period;
+    const rs = avgLoss === 0 ? 100 : avgGain/avgLoss;
+    result.push({time: data[i].time, value: parseFloat((100 - 100/(1+rs)).toFixed(2))});
+  }
+  return result;
+}
+
+function updateRSI() {
+  const panelId = 'panel-rsi';
+  const existing = document.getElementById(panelId);
+  if (!indicators.rsi) { if (existing) existing.remove(); rsiChart = null; return; }
+  if (!existing && rawCandles.length > 15) {
+    const panel = document.createElement('div');
+    panel.id = panelId; panel.className = 'bottom-panel';
+    panel.style.height = '100px';
+    panel.innerHTML = `<div class="bp-label">RSI (14)</div><button class="bp-close" onclick="toggleInd('rsi')">✕</button><div id="rsiChartDiv" style="width:100%;height:100%;"></div>`;
+    document.getElementById('bottomPanels').appendChild(panel);
+    const rsiDiv = document.getElementById('rsiChartDiv');
+    rsiChart = LightweightCharts.createChart(rsiDiv, {
+      width: rsiDiv.clientWidth, height: 100,
+      layout: { background:{type:'solid',color:'#000'}, textColor:'#444', fontFamily:"'Space Mono',monospace", fontSize:9 },
+      grid: { vertLines:{color:'#0a0a0a'}, horzLines:{color:'#0a0a0a'} },
+      rightPriceScale: { borderColor:'#181818', scaleMargins:{top:.1,bottom:.1} },
+      timeScale: { borderColor:'#181818', visible:false },
+      crosshair: { mode:1 },
+      handleScroll: false, handleScale: false,
+    });
+    rsiSeries = rsiChart.addLineSeries({ color:'#C9A84C', lineWidth:1, priceLineVisible:false, lastValueVisible:true });
+    // Overbought/sold lines
+    const obLine = rsiChart.addLineSeries({color:'rgba(255,68,68,.3)',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
+    const osLine = rsiChart.addLineSeries({color:'rgba(0,200,150,.3)',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
+    const rsiData = calcRSI(rawCandles);
+    obLine.setData(rsiData.map(d=>({time:d.time,value:70})));
+    osLine.setData(rsiData.map(d=>({time:d.time,value:30})));
+    // Sync timeScale
+    chart.timeScale().subscribeVisibleLogicalRangeChange(r => { if(rsiChart&&r) rsiChart.timeScale().setVisibleLogicalRange(r); });
+    rsiChart.timeScale().subscribeVisibleLogicalRangeChange(r => { if(r) chart.timeScale().setVisibleLogicalRange(r); });
+  }
+  if (rsiSeries && rawCandles.length > 15) {
+    rsiSeries.setData(calcRSI(rawCandles));
+  }
+}
+
+function calcMACD(data, fast=12, slow=26, signal=9) {
+  const emaFast = calcEMA(data, fast);
+  const emaSlow = calcEMA(data, slow);
+  const macdLine = emaFast.slice(slow-fast).map((d,i) => ({
+    time: d.time, value: parseFloat((d.value - emaSlow[slow-fast+i].value).toFixed(5))
+  }));
+  const signalLine = calcEMA(macdLine.map(d=>({...d,close:d.value})), signal);
+  const hist = macdLine.slice(signal-1).map((d,i) => ({
+    time: d.time, value: parseFloat((d.value - signalLine[i].value).toFixed(5)),
+    color: d.value >= signalLine[i].value ? 'rgba(0,200,150,.5)' : 'rgba(255,68,68,.5)'
+  }));
+  return { macdLine, signalLine, hist };
+}
+
+function updateMACD() {
+  const panelId = 'panel-macd';
+  const existing = document.getElementById(panelId);
+  if (!indicators.macd) { if(existing) existing.remove(); macdChart=null; return; }
+  if (!existing && rawCandles.length > 30) {
+    const panel = document.createElement('div');
+    panel.id = panelId; panel.className = 'bottom-panel';
+    panel.style.height = '100px';
+    panel.innerHTML = `<div class="bp-label">MACD (12,26,9)</div><button class="bp-close" onclick="toggleInd('macd')">✕</button><div id="macdChartDiv" style="width:100%;height:100%;"></div>`;
+    document.getElementById('bottomPanels').appendChild(panel);
+    const macdDiv = document.getElementById('macdChartDiv');
+    macdChart = LightweightCharts.createChart(macdDiv, {
+      width: macdDiv.clientWidth, height: 100,
+      layout: { background:{type:'solid',color:'#000'}, textColor:'#444', fontFamily:"'Space Mono',monospace", fontSize:9 },
+      grid: { vertLines:{color:'#0a0a0a'}, horzLines:{color:'#0a0a0a'} },
+      rightPriceScale: { borderColor:'#181818', scaleMargins:{top:.1,bottom:.1} },
+      timeScale: { borderColor:'#181818', visible:false },
+      crosshair: { mode:1 },
+      handleScroll: false, handleScale: false,
+    });
+    macdFastSeries = macdChart.addLineSeries({color:'#C9A84C',lineWidth:1,priceLineVisible:false,lastValueVisible:false});
+    macdSlowSeries = macdChart.addLineSeries({color:'#4A9EFF',lineWidth:1,priceLineVisible:false,lastValueVisible:false});
+    macdHistSeries = macdChart.addHistogramSeries({priceLineVisible:false,lastValueVisible:false});
+    chart.timeScale().subscribeVisibleLogicalRangeChange(r=>{if(macdChart&&r) macdChart.timeScale().setVisibleLogicalRange(r);});
+    macdChart.timeScale().subscribeVisibleLogicalRangeChange(r=>{if(r) chart.timeScale().setVisibleLogicalRange(r);});
+  }
+  if (macdFastSeries && rawCandles.length > 30) {
+    const m = calcMACD(rawCandles);
+    macdFastSeries.setData(m.macdLine);
+    macdSlowSeries.setData(m.signalLine.map((d,i)=>({time:d.time,value:d.value})));
+    macdHistSeries.setData(m.hist);
+  }
+}
+
+function updateVolume() {
+  if (!volumeSeries) return;
+  if (indicators.volume && rawCandles.length) {
+    volumeSeries.setData(rawCandles.map(c=>({time:c.time,value:c.volume||0,color:c.close>=c.open?'rgba(0,200,150,.15)':'rgba(255,68,68,.15)'})));
+  } else {
+    volumeSeries.setData([]);
+  }
+}
+
+function toggleInd(key) {
+  indicators[key] = !indicators[key];
+  updateAllIndicators();
+  buildIndModal();
+  document.getElementById('panel-rsi')?.style && null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAWING ENGINE
+// ═══════════════════════════════════════════════════════════════
+function setupDrawCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  resizeDrawCanvas();
+  canvas.addEventListener('mousedown', onDrawMouseDown);
+  canvas.addEventListener('mousemove', onDrawMouseMove);
+  canvas.addEventListener('mouseup', onDrawMouseUp);
+  canvas.addEventListener('dblclick', onDrawDblClick);
+  canvas.addEventListener('contextmenu', onDrawRightClick);
+  canvas.addEventListener('touchstart', onTouchStart, {passive:false});
+  canvas.addEventListener('touchmove', onTouchMove, {passive:false});
+  canvas.addEventListener('touchend', onTouchEnd);
+}
+
+function resizeDrawCanvas() {
+  const container = document.getElementById('chartContainer');
+  const canvas = document.getElementById('drawCanvas');
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+}
+
+function getCanvasPos(e) {
+  const canvas = document.getElementById('drawCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function canvasToPrice(pos) {
+  try {
+    const price = mainSeries.coordinateToPrice(pos.y);
+    const time = chart.timeScale().coordinateToTime(pos.x);
+    return { price, time };
+  } catch(e) { return { price: null, time: null }; }
+}
+
+function priceToCanvas(price, time) {
+  try {
+    const y = mainSeries.priceToCoordinate(price);
+    const x = chart.timeScale().timeToCoordinate(time);
+    return { x, y };
+  } catch(e) { return { x: 0, y: 0 }; }
+}
+
+function onDrawMouseDown(e) {
+  if (currentTool === 'cursor' || currentTool === 'crosshair') {
+    // Check if clicking a drawing
+    const pos = getCanvasPos(e);
+    selectedDrawing = findDrawingAtPos(pos);
+    if (selectedDrawing) {
+      isDragging = true;
+      dragOffset = pos;
+      e.preventDefault();
+    } else {
+      selectedDrawing = null;
+    }
+    redrawAll();
+    return;
+  }
+  e.preventDefault();
+  const pos = getCanvasPos(e);
+  const pt = canvasToPrice(pos);
+  if (!pt.price) return;
+
+  if (['trendline','hline','vline','ray','extended','fib','fibext','measure','channel'].includes(currentTool)) {
+    if (drawingPoints.length === 0) {
+      drawingPoints = [pt];
+      activeDrawing = { type: currentTool, points: [pt], color: drawColor, width: drawWidth, dash: drawDash, fill: drawFill, id: Date.now() };
+    } else {
+      activeDrawing.points.push(pt);
+      if (['trendline','hline','vline','ray','extended','fib','fibext','measure'].includes(currentTool)) {
+        drawings.push({...activeDrawing});
+        drawingPoints = [];
+        activeDrawing = null;
+        updateDrawCount();
+      }
+    }
+  } else if (['rect','ellipse','triangle','channel'].includes(currentTool)) {
+    if (drawingPoints.length === 0) {
+      drawingPoints = [pt];
+      activeDrawing = { type: currentTool, points: [pt], color: drawColor, width: drawWidth, dash: drawDash, fill: drawFill, id: Date.now() };
+    } else {
+      activeDrawing.points.push(pt);
+      drawings.push({...activeDrawing});
+      drawingPoints = [];
+      activeDrawing = null;
+      updateDrawCount();
+    }
+  } else if (currentTool === 'arrow') {
+    if (drawingPoints.length === 0) { drawingPoints = [pt]; activeDrawing = {type:'arrow',points:[pt],color:drawColor,width:drawWidth,id:Date.now()}; }
+    else { activeDrawing.points.push(pt); drawings.push({...activeDrawing}); drawingPoints=[]; activeDrawing=null; updateDrawCount(); }
+  } else if (currentTool === 'text' || currentTool === 'callout') {
+    const label = prompt('Enter text:','');
+    if (label) { drawings.push({type:currentTool,points:[pt],label,color:drawColor,width:drawWidth,id:Date.now()}); updateDrawCount(); }
+  } else if (currentTool === 'flag') {
+    drawings.push({type:'flag',points:[pt],color:drawColor,width:drawWidth,id:Date.now()});
+    updateDrawCount();
+  } else if (currentTool === 'pitchfork') {
+    drawingPoints.push(pt);
+    if (!activeDrawing) activeDrawing = {type:'pitchfork',points:[pt],color:drawColor,width:drawWidth,id:Date.now()};
+    else activeDrawing.points.push(pt);
+    if (drawingPoints.length === 3) { drawings.push({...activeDrawing}); drawingPoints=[]; activeDrawing=null; updateDrawCount(); }
+  } else if (currentTool === 'fibfan') {
+    if (drawingPoints.length === 0) { drawingPoints=[pt]; activeDrawing={type:'fibfan',points:[pt],color:drawColor,width:drawWidth,id:Date.now()}; }
+    else { activeDrawing.points.push(pt); drawings.push({...activeDrawing}); drawingPoints=[]; activeDrawing=null; updateDrawCount(); }
+  }
+  redrawAll();
+}
+
+function onDrawMouseMove(e) {
+  const pos = getCanvasPos(e);
+  if (isDragging && selectedDrawing) {
+    const dx = pos.x - dragOffset.x;
+    const dy = pos.y - dragOffset.y;
+    dragOffset = pos;
+    // Move all points
+    selectedDrawing.points = selectedDrawing.points.map(pt => {
+      const c = priceToCanvas(pt.price, pt.time);
+      const newC = { x: c.x + dx, y: c.y + dy };
+      const newPt = canvasToPrice(newC);
+      return newPt.price ? newPt : pt;
+    });
+    const idx = drawings.findIndex(d=>d.id===selectedDrawing.id);
+    if (idx>=0) drawings[idx] = selectedDrawing;
+    redrawAll();
+    return;
+  }
+  if (activeDrawing && drawingPoints.length > 0) {
+    const pt = canvasToPrice(pos);
+    if (pt.price) {
+      activeDrawing.previewPoint = pt;
+      redrawAll();
+    }
+  }
+  // Hover detection
+  const prev = hoveredDrawing;
+  hoveredDrawing = findDrawingAtPos(pos);
+  const canvas = document.getElementById('drawCanvas');
+  if (currentTool !== 'cursor') {
+    canvas.className = 'cursor-crosshair';
+  } else {
+    canvas.className = hoveredDrawing ? 'cursor-pointer' : 'cursor-default';
+  }
+  if (prev !== hoveredDrawing) redrawAll();
+}
+
+function onDrawMouseUp(e) {
+  isDragging = false;
+}
+
+function onDrawDblClick(e) {
+  // Finish multi-point drawings
+  if (activeDrawing && ['channel','pitchfork'].includes(activeDrawing.type)) {
+    drawings.push({...activeDrawing});
+    drawingPoints = [];
+    activeDrawing = null;
+    updateDrawCount();
+    redrawAll();
+  }
+}
+
+function onDrawRightClick(e) {
+  e.preventDefault();
+  const pos = getCanvasPos(e);
+  const hit = findDrawingAtPos(pos);
+  if (hit) {
+    selectedDrawing = hit;
+    showContextMenu(e.clientX, e.clientY);
+  }
+}
+
+function onTouchStart(e) { e.preventDefault(); onDrawMouseDown(e); }
+function onTouchMove(e) { e.preventDefault(); onDrawMouseMove(e); }
+function onTouchEnd(e) { onDrawMouseUp(e); }
+
+function findDrawingAtPos(pos) {
+  for (let i = drawings.length-1; i>=0; i--) {
+    if (isNearDrawing(drawings[i], pos)) return drawings[i];
+  }
+  return null;
+}
+
+function isNearDrawing(d, pos) {
+  const threshold = 8;
+  if (!d.points[0]) return false;
+  const p0 = priceToCanvas(d.points[0].price, d.points[0].time);
+  if (d.type === 'hline') {
+    return Math.abs(pos.y - p0.y) < threshold;
+  }
+  if (d.type === 'vline') {
+    return Math.abs(pos.x - p0.x) < threshold;
+  }
+  if (d.type === 'flag' || d.type === 'text') {
+    return Math.abs(pos.x-p0.x)<20 && Math.abs(pos.y-p0.y)<20;
+  }
+  if (d.points[1]) {
+    const p1 = priceToCanvas(d.points[1].price, d.points[1].time);
+    return distToSegment(pos, p0, p1) < threshold;
+  }
+  return false;
+}
+
+function distToSegment(p, a, b) {
+  const dx = b.x-a.x, dy = b.y-a.y;
+  if (dx===0&&dy===0) return Math.hypot(p.x-a.x, p.y-a.y);
+  const t = Math.max(0, Math.min(1, ((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy)));
+  return Math.hypot(p.x-(a.x+t*dx), p.y-(a.y+t*dy));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAW RENDERING
+// ═══════════════════════════════════════════════════════════════
+function redrawAll() {
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  [...drawings, ...(activeDrawing ? [activeDrawing] : [])].forEach(d => renderDrawing(ctx, d));
+}
+
+function applyStyle(ctx, d, isHovered, isSelected) {
+  ctx.strokeStyle = isSelected ? '#fff' : isHovered ? d.color : d.color;
+  ctx.lineWidth = (d.width || 1) + (isHovered || isSelected ? 1 : 0);
+  ctx.setLineDash(d.dash ? [5,5] : []);
+  ctx.globalAlpha = isHovered ? 1 : 0.85;
+}
+
+function renderDrawing(ctx, d) {
+  const isHovered = hoveredDrawing && hoveredDrawing.id === d.id;
+  const isSelected = selectedDrawing && selectedDrawing.id === d.id;
+  if (!d.points[0]) return;
+  const p0 = priceToCanvas(d.points[0].price, d.points[0].time);
+  const p1end = d.previewPoint || d.points[1];
+  const p1 = p1end ? priceToCanvas(p1end.price, p1end.time) : null;
+  ctx.save();
+  applyStyle(ctx, d, isHovered, isSelected);
+
+  switch(d.type) {
+    case 'trendline':
+      if (p1) { ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke(); }
+      break;
+    case 'ray':
+      if (p1) {
+        const ext = extendRay(p0, p1, canvas.width, canvas.height);
+        ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(ext.x,ext.y); ctx.stroke();
+      }
+      break;
+    case 'extended':
+      if (p1) {
+        const e0 = extendRay(p1,p0,canvas.width,canvas.height);
+        const e1 = extendRay(p0,p1,canvas.width,canvas.height);
+        ctx.beginPath(); ctx.moveTo(e0.x,e0.y); ctx.lineTo(e1.x,e1.y); ctx.stroke();
+      }
+      break;
+    case 'hline': {
+      ctx.beginPath(); ctx.moveTo(0,p0.y); ctx.lineTo(canvas.width,p0.y); ctx.stroke();
+      // Price label
+      ctx.font = "9px 'Space Mono'"; ctx.fillStyle = d.color; ctx.globalAlpha = .7;
+      ctx.fillText(fmt(d.points[0].price), canvas.width - 80, p0.y - 4);
+      break;
+    }
+    case 'vline': {
+      ctx.beginPath(); ctx.moveTo(p0.x,0); ctx.lineTo(p0.x,canvas.height); ctx.stroke();
+      break;
+    }
+    case 'rect':
+      if (p1) {
+        ctx.beginPath(); ctx.rect(p0.x,p0.y,p1.x-p0.x,p1.y-p0.y);
+        if (d.fill) { ctx.fillStyle = d.color + '22'; ctx.fill(); }
+        ctx.stroke();
+      }
+      break;
+    case 'ellipse':
+      if (p1) {
+        const cx=(p0.x+p1.x)/2, cy=(p0.y+p1.y)/2;
+        const rx=Math.abs(p1.x-p0.x)/2, ry=Math.abs(p1.y-p0.y)/2;
+        ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+        if (d.fill) { ctx.fillStyle = d.color + '22'; ctx.fill(); }
+        ctx.stroke();
+      }
+      break;
+    case 'triangle':
+      if (p1) {
+        const mx = (p0.x+p1.x)/2;
+        ctx.beginPath(); ctx.moveTo(mx,p0.y); ctx.lineTo(p1.x,p1.y); ctx.lineTo(p0.x,p1.y); ctx.closePath();
+        if (d.fill) { ctx.fillStyle = d.color + '22'; ctx.fill(); }
+        ctx.stroke();
+      }
+      break;
+    case 'arrow':
+      if (p1) {
+        const angle = Math.atan2(p1.y-p0.y, p1.x-p0.x);
+        ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
+        const hs = 10;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p1.x - hs*Math.cos(angle-0.4), p1.y - hs*Math.sin(angle-0.4));
+        ctx.lineTo(p1.x - hs*Math.cos(angle+0.4), p1.y - hs*Math.sin(angle+0.4));
+        ctx.closePath(); ctx.fillStyle = d.color; ctx.fill();
+      }
+      break;
+    case 'fib':
+    case 'fibext':
+      if (p1) renderFib(ctx, d, p0, p1, canvas.width);
+      break;
+    case 'fibfan':
+      if (p1) renderFibFan(ctx, d, p0, p1, canvas.width, canvas.height);
+      break;
+    case 'measure':
+      if (p1) renderMeasure(ctx, d, p0, p1);
+      break;
+    case 'pitchfork':
+      renderPitchfork(ctx, d);
+      break;
+    case 'channel':
+      if (p1) { ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke(); }
+      break;
+    case 'text':
+    case 'callout':
+      ctx.font = "bold 13px 'Rajdhani'";
+      ctx.fillStyle = d.color; ctx.globalAlpha = 1;
+      ctx.fillText(d.label || 'Label', p0.x, p0.y);
+      break;
+    case 'flag':
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y); ctx.lineTo(p0.x, p0.y-20);
+      ctx.lineTo(p0.x+14, p0.y-14); ctx.lineTo(p0.x, p0.y-8);
+      ctx.fillStyle = d.color; ctx.fill(); ctx.stroke();
+      break;
+  }
+  // Draw point handles
+  if (isSelected || isHovered) {
+    [p0, p1].filter(Boolean).forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+      ctx.fillStyle = '#fff'; ctx.fill();
+    });
+  }
+  ctx.restore();
+}
+
+const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+const FIB_EXT_LEVELS = [0, 0.618, 1, 1.272, 1.618, 2.0, 2.618];
+const FIB_COLORS = ['#FF4444','#FF8C00','#C9A84C','#4A9EFF','#00C896','#A78BFA','#F472B6'];
+
+function renderFib(ctx, d, p0, p1, cw) {
+  const levels = d.type === 'fibext' ? FIB_EXT_LEVELS : FIB_LEVELS;
+  const dy = p1.y - p0.y;
+  levels.forEach((lvl, i) => {
+    const y = d.type==='fibext' ? p1.y - lvl*dy : p0.y + lvl*dy;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y);
+    ctx.strokeStyle = FIB_COLORS[i % FIB_COLORS.length];
+    ctx.lineWidth = 1; ctx.setLineDash([3,3]); ctx.globalAlpha = .6;
+    ctx.stroke();
+    ctx.font = "8px 'Space Mono'"; ctx.fillStyle = FIB_COLORS[i%FIB_COLORS.length]; ctx.globalAlpha = .8;
+    ctx.fillText(lvl.toFixed(3), cw - 40, y - 2);
+  });
+}
+
+function renderFibFan(ctx, d, p0, p1, cw, ch) {
+  const fanLevels = [0.236, 0.382, 0.5, 0.618, 0.786];
+  fanLevels.forEach((lvl, i) => {
+    const fy = p0.y + (p1.y - p0.y) * lvl;
+    const ext = extendRay(p0, {x:p1.x, y:fy}, cw, ch);
+    ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(ext.x, ext.y);
+    ctx.strokeStyle = FIB_COLORS[i+1]; ctx.lineWidth=1; ctx.setLineDash([2,4]); ctx.globalAlpha=.7;
+    ctx.stroke();
+  });
+}
+
+function renderMeasure(ctx, d, p0, p1) {
+  if (!d.points[1]) return;
+  ctx.beginPath(); ctx.rect(p0.x, p0.y, p1.x-p0.x, p1.y-p0.y);
+  ctx.fillStyle = 'rgba(201,168,76,.06)'; ctx.fill();
+  ctx.strokeStyle = d.color; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke();
+  const priceDiff = Math.abs(d.points[0].price - d.points[1].price);
+  const pip = priceDiff / currentSymbol.pip;
+  const cx = (p0.x+p1.x)/2, cy = (p0.y+p1.y)/2;
+  ctx.setLineDash([]);
+  ctx.font = "bold 10px 'Space Mono'"; ctx.fillStyle = d.color; ctx.globalAlpha = 1;
+  ctx.textAlign = 'center';
+  ctx.fillText(priceDiff.toFixed(currentSymbol.dec) + ' | ' + pip.toFixed(1) + ' pips', cx, cy);
+  ctx.textAlign = 'left';
+}
+
+function renderPitchfork(ctx, d) {
+  if (d.points.length < 3) return;
+  const p = d.points.map(pt => priceToCanvas(pt.price, pt.time));
+  const mid = { x:(p[1].x+p[2].x)/2, y:(p[1].y+p[2].y)/2 };
+  ctx.strokeStyle = d.color; ctx.lineWidth = d.width||1; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(p[0].x,p[0].y); ctx.lineTo(mid.x,mid.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(p[0].x,p[0].y); ctx.lineTo(p[1].x,p[1].y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(p[0].x,p[0].y); ctx.lineTo(p[2].x,p[2].y); ctx.stroke();
+}
+
+function extendRay(from, to, cw, ch) {
+  const dx = to.x - from.x, dy = to.y - from.y;
+  if (dx === 0 && dy === 0) return to;
+  let t = Infinity;
+  if (dx !== 0) t = Math.min(t, dx > 0 ? (cw-from.x)/dx : -from.x/dx);
+  if (dy !== 0) t = Math.min(t, dy > 0 ? (ch-from.y)/dy : -from.y/dy);
+  return { x: from.x + dx*t, y: from.y + dy*t };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI CONTROLS
+// ═══════════════════════════════════════════════════════════════
+function setTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.dt-btn[id^="tool"]').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1));
+  if (el) el.classList.add('active');
+  document.getElementById('sbDrawMode').style.display = tool === 'cursor' ? 'none' : 'flex';
+}
+
+function updateDrawStyle() {
+  drawColor = document.getElementById('drawColor').value;
+  drawWidth = parseInt(document.getElementById('drawWidth').value) || 1;
+}
+
+function toggleDash() {
+  drawDash = !drawDash;
+  document.getElementById('dashToggle').classList.toggle('active', drawDash);
+}
+
+function toggleFill() {
+  drawFill = !drawFill;
+  document.getElementById('fillToggle').classList.toggle('active', drawFill);
+}
+
+function clearDrawings() {
+  if (!drawings.length) return;
+  if (confirm('Clear all drawings?')) {
+    drawings = []; activeDrawing = null; drawingPoints = [];
+    redrawAll(); updateDrawCount();
+  }
+}
+
+function setTF(tf, btn) {
+  currentTF = tf;
+  document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('overlayTF').textContent = tfLabel(tf) + ' · BiddyFX';
+  loadSymbol(currentSymbol);
+}
+
+function setChartType(type, btn) {
+  currentChartType = type;
+  document.querySelectorAll('.ct-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  createMainSeries();
+  if (rawCandles.length) setChartData(rawCandles);
+  updateAllIndicators();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SYMBOL MODAL
+// ═══════════════════════════════════════════════════════════════
+let smCatFilter = 'all';
+
+function openSymbolModal() {
+  document.getElementById('symbolModal').classList.add('open');
+  document.getElementById('smInput').focus();
+  renderSmResults('');
+}
+
+function closeSymbolModal() {
+  document.getElementById('symbolModal').classList.remove('open');
+}
+
+function filterSmCat(cat, btn) {
+  smCatFilter = cat;
+  document.querySelectorAll('.sm-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSmResults(document.getElementById('smInput').value);
+}
+
+function filterSymbols(q) { renderSmResults(q); }
+
+function renderSmResults(q) {
+  const results = document.getElementById('smResults');
+  const query = q.toLowerCase();
+  let filtered = SYMBOLS.filter(s =>
+    (smCatFilter === 'all' || s.cat === smCatFilter) &&
+    (!query || s.sym.toLowerCase().includes(query) || s.name.toLowerCase().includes(query))
+  );
+  if (!filtered.length) { results.innerHTML = '<div style="padding:20px;text-align:center;font-family:Space Mono,monospace;font-size:10px;color:#333;">No results</div>'; return; }
+  const cats = [...new Set(filtered.map(s=>s.cat))];
+  results.innerHTML = cats.map(cat => {
+    const syms = filtered.filter(s=>s.cat===cat);
+    return `<div class="sm-section-title">${cat.toUpperCase()}</div>` +
+      syms.map(s => `<div class="sm-result" onclick="selectSymbol('${s.sym}')">
+        <div class="sm-r-sym">${fmtSym(s.sym)}</div>
+        <div class="sm-r-name">${s.name}</div>
+        <div class="sm-r-cat">${s.cat}</div>
+      </div>`).join('');
+  }).join('');
+}
+
+function selectSymbol(sym) {
+  const s = SYMBOLS.find(x => x.sym === sym);
+  if (!s) return;
+  closeSymbolModal();
+  loadSymbol(s);
+  // Update watchlist active
+  document.querySelectorAll('.wl-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.sym === sym);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WATCHLIST
+// ═══════════════════════════════════════════════════════════════
+const WATCHLIST_SYMBOLS = ['EURUSD','GBPUSD','GBPJPY','XAUUSD','USDJPY','AUDUSD','BTCUSD','ETHUSD','US30','SPX500','NAS100','USOIL','USDX','VIX'];
+
+function buildWatchlist() {
+  renderWatchlist(WATCHLIST_SYMBOLS);
+}
+
+function renderWatchlist(syms) {
+  const list = document.getElementById('wlList');
+  list.innerHTML = syms.filter(s => wlFilter === 'all' || SYMBOLS.find(x=>x.sym===s)?.cat === wlFilter).map(sym => {
+    const info = SYMBOLS.find(x=>x.sym===sym);
+    const p = wlPrices[sym];
+    return `<div class="wl-item${sym===currentSymbol.sym?' active':''}" onclick="selectSymbol('${sym}')" data-sym="${sym}">
+      <div>
+        <div class="wl-sym">${fmtSym(sym)}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);">${info?.cat||''}</div>
+      </div>
+      <div>
+        <div class="wl-price">${p ? p.price : '—'}</div>
+        <div class="wl-chg ${p&&p.chg>=0?'up':'dn'}">${p ? (p.chg>=0?'+':'')+p.chgPct+'%' : '—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterWatchlist(q) {
+  const filtered = q ? WATCHLIST_SYMBOLS.filter(s=>s.includes(q.toUpperCase())) : WATCHLIST_SYMBOLS;
+  renderWatchlist(filtered);
+}
+
+function filterWlCat(cat, btn) {
+  wlFilter = cat;
+  document.querySelectorAll('.wl-cat').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWatchlist(WATCHLIST_SYMBOLS);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INDICATOR MODAL
+// ═══════════════════════════════════════════════════════════════
+const IND_DEFS = [
+  {key:'volume',name:'Volume',desc:'Trading volume histogram',overlay:true},
+  {key:'ema20',name:'EMA 20',desc:'Exponential Moving Average (20)',overlay:true},
+  {key:'ema50',name:'EMA 50',desc:'Exponential Moving Average (50)',overlay:true},
+  {key:'ema200',name:'EMA 200',desc:'Exponential Moving Average (200)',overlay:true},
+  {key:'sma20',name:'SMA 20',desc:'Simple Moving Average (20)',overlay:true},
+  {key:'sma50',name:'SMA 50',desc:'Simple Moving Average (50)',overlay:true},
+  {key:'bb',name:'Bollinger Bands',desc:'BB (20, 2) — volatility bands',overlay:true},
+  {key:'rsi',name:'RSI (14)',desc:'Relative Strength Index — overbought/oversold',overlay:false},
+  {key:'macd',name:'MACD (12,26,9)',desc:'Trend momentum oscillator',overlay:false},
+  {key:'vwap',name:'VWAP',desc:'Volume Weighted Average Price',overlay:true},
+  {key:'atr',name:'ATR (14)',desc:'Average True Range — volatility',overlay:true},
+  {key:'stoch',name:'Stochastic (14,3)',desc:'Stochastic oscillator',overlay:false},
+  {key:'cci',name:'CCI (20)',desc:'Commodity Channel Index',overlay:false},
+];
+
+function buildIndModal() {
+  const list = document.getElementById('imList');
+  list.innerHTML = IND_DEFS.map(ind => `
+    <div class="im-item" onclick="toggleInd('${ind.key}')">
+      <div class="im-item-info">
+        <div class="im-item-name">${ind.name} <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);">${ind.overlay?'overlay':'panel'}</span></div>
+        <div class="im-item-desc">${ind.desc}</div>
+      </div>
+      <div class="im-toggle ${indicators[ind.key]?'on':''}"></div>
+    </div>`).join('');
+}
+
+function openIndModal() { document.getElementById('indModal').classList.add('open'); }
+function closeIndModal() { document.getElementById('indModal').classList.remove('open'); buildIndModal(); }
+
+// ═══════════════════════════════════════════════════════════════
+// CONTEXT MENU
+// ═══════════════════════════════════════════════════════════════
+function showContextMenu(x, y) {
+  const cm = document.getElementById('contextMenu');
+  cm.style.display = 'block';
+  cm.style.left = x + 'px';
+  cm.style.top = y + 'px';
+  document.addEventListener('click', () => cm.style.display='none', {once:true});
+}
+
+function ctxDelete() {
+  if (selectedDrawing) {
+    drawings = drawings.filter(d=>d.id!==selectedDrawing.id);
+    selectedDrawing = null; updateDrawCount(); redrawAll();
+  }
+}
+
+function ctxEdit() {
+  if (selectedDrawing && (selectedDrawing.type==='text'||selectedDrawing.type==='callout')) {
+    const label = prompt('Edit text:', selectedDrawing.label||'');
+    if (label !== null) {
+      selectedDrawing.label = label;
+      const idx = drawings.findIndex(d=>d.id===selectedDrawing.id);
+      if (idx>=0) drawings[idx].label = label;
+      redrawAll();
+    }
+  }
+}
+
+function ctxDuplicate() {
+  if (selectedDrawing) {
+    const dup = JSON.parse(JSON.stringify(selectedDrawing));
+    dup.id = Date.now();
+    dup.points = dup.points.map(p=>({price:p.price*(1+0.0005), time:p.time+60}));
+    drawings.push(dup); updateDrawCount(); redrawAll();
+  }
+}
+
+function ctxChangeColor() {
+  const c = prompt('Enter color (hex):', selectedDrawing?.color||'#C9A84C');
+  if (c && selectedDrawing) {
+    const idx = drawings.findIndex(d=>d.id===selectedDrawing.id);
+    if (idx>=0) { drawings[idx].color=c; selectedDrawing.color=c; redrawAll(); }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function fmt(v) { if (v===null||v===undefined) return '—'; return parseFloat(v).toFixed(currentSymbol?.dec||5); }
+function fmtSym(s) {
+  if (['EURUSD','GBPUSD','USDJPY','GBPJPY','AUDUSD','USDCHF','USDCAD','NZDUSD'].includes(s)) return s.slice(0,3)+'/'+s.slice(3);
+  if (s==='XAUUSD') return 'XAU/USD';
+  if (s==='XAGUSD') return 'XAG/USD';
+  if (s==='BTCUSD') return 'BTC/USD';
+  if (s==='ETHUSD') return 'ETH/USD';
+  return s;
+}
+function tfLabel(tf) { return {'1':'1M','5':'5M','15':'15M','30':'30M','60':'1H','240':'4H','D':'1D','W':'1W','M':'1MO'}[tf]||tf; }
+
+function showLoading(show, sym='') {
+  document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+  if (sym) document.getElementById('loadingSymText').textContent = fmtSym(sym);
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  document.getElementById('statusText').textContent = text;
+  dot.className = 'sb-dot' + (state==='loading'?' loading':state==='error'?' error':'');
+}
+
+function updateDrawCount() {
+  const el = document.getElementById('sbDrawCount');
+  el.textContent = drawings.length ? drawings.length + ' drawing' + (drawings.length>1?'s':'') : '';
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const map = {
+    'Escape': ()=>{setTool('cursor');closeSymbolModal();closeIndModal();},
+    'v': ()=>setTool('cursor'),
+    'h': ()=>setTool('hline'),
+    't': ()=>setTool('trendline'),
+    'f': ()=>setTool('fib'),
+    'r': ()=>setTool('rect'),
+    'x': ()=>setTool('text'),
+    'Delete': ctxDelete,
+    'Backspace': ctxDelete,
+  };
+  if (map[e.key]) { map[e.key](); e.preventDefault(); }
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { closeSymbolModal(); closeIndModal(); }
+});
+
+// Symbol search — Enter
+document.getElementById('smInput').addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    const first = document.querySelector('.sm-result');
+    if (first) first.click();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+initChart();
+</script>
+</body>
+</html>
