@@ -1449,6 +1449,32 @@ function showPanel(id) {
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
-</script>
+<script>
+// --- ADD THE KEY FUNCTION HERE ---
+function emailToId(email) {
+  return email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+}
+
+// Then find your window.onload or start-up code and use it
+window.onload = async () => {
+  const data = localStorage.getItem('bfx_user');
+  if (!data) { window.location.href = 'login.html'; return; }
+  
+  const user = JSON.parse(data);
+  
+  // Use the key to find the student in Firebase
+  if (window._db && window._fbFns) {
+    const { doc, onSnapshot } = window._fbFns;
+    const docId = emailToId(user.email); // <--- Using the key here
+
+    onSnapshot(doc(window._db, 'students', docId), (docSnap) => {
+      if (docSnap.exists()) {
+        currentUser = docSnap.data();
+        localStorage.setItem('bfx_user', JSON.stringify(currentUser));
+        buildOverview(); 
+      }
+    });
+  }
+};
 </body>
 </html>
