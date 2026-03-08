@@ -1450,31 +1450,30 @@ function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
 <script>
-// --- ADD THE KEY FUNCTION HERE ---
-function emailToId(email) {
-  return email.toLowerCase().replace(/[^a-z0-9]/g, '_');
-}
-
-// Then find your window.onload or start-up code and use it
-window.onload = async () => {
+// This tells the dashboard to watch for changes from the Admin
+document.addEventListener('firebaseReady', () => {
   const data = localStorage.getItem('bfx_user');
-  if (!data) { window.location.href = 'login.html'; return; }
+  if (!data) return;
   
   const user = JSON.parse(data);
+  const { doc, onSnapshot } = window._fbFns;
   
-  // Use the key to find the student in Firebase
-  if (window._db && window._fbFns) {
-    const { doc, onSnapshot } = window._fbFns;
-    const docId = emailToId(user.email); // <--- Using the key here
+  // Create the same ID key
+  const docId = user.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
-    onSnapshot(doc(window._db, 'students', docId), (docSnap) => {
-      if (docSnap.exists()) {
-        currentUser = docSnap.data();
-        localStorage.setItem('bfx_user', JSON.stringify(currentUser));
-        buildOverview(); 
-      }
-    });
-  }
-};
+  // Stay on the "live call" with Firebase
+  onSnapshot(doc(window._db, 'students', docId), (docSnap) => {
+    if (docSnap.exists()) {
+      const liveData = docSnap.data();
+      
+      // Update the student's local memory
+      localStorage.setItem('bfx_user', JSON.stringify(liveData));
+      currentUser = liveData;
+      
+      // Update the UI (like their Tier/Program) without refreshing
+      if (typeof buildOverview === "function") buildOverview();
+    }
+  });
+});
 </body>
 </html>
