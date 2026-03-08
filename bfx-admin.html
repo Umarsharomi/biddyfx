@@ -733,33 +733,33 @@ async function saveTier() {
   if (!currentStudentId) return;
   const newTier = document.getElementById('modalTierSelect').value;
   
-  // 1. Find the student in your local list
+  // 1. Find the student in your list
   const s = allStudents.find(x => x.id === currentStudentId); 
   if (!s) return;
 
-  // 2. Update local UI
+  // 2. Update the Admin screen immediately
   s.prog = newTier; 
   updateStats(); 
   renderTable(); 
   closeModal();
   showToast('✓ ' + s.name + ' → ' + newTier);
 
-  // 3. Save to Firebase using the SAME ID format as the Dashboard
+  // 3. Save to Firebase using the "Email-to-ID" key
   if (window._db) {
     try { 
       const { doc, updateDoc } = window._firebase; 
       
-      // THIS IS THE FIX: Generate the ID from the email
+      // We turn the email into the ID: e.g., "umar_gmail_com"
       const docId = s.email.toLowerCase().replace(/[^a-z0-9]/g, '_'); 
       
       await updateDoc(doc(window._db, 'students', docId), { 
         prog: newTier 
       }); 
       
-      showToast('✓ Saved to Firebase'); 
+      showToast('✓ Synced to Student Dashboard'); 
     }
     catch(e) { 
-      showToast('Local done. Firebase: ' + e.message, true); 
+      showToast('Local done. Firebase Error: ' + e.message, true); 
     }
   }
 }
