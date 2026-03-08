@@ -1161,5 +1161,17 @@ function showToast() {
   setTimeout(() => t.style.opacity = '0', 3000);
 }
 </script>
+   document.addEventListener('firebaseReady', () => {
+  const { doc, onSnapshot } = window._fbFns;
+  
+  // This "listens" to the bias data you save in the Admin portal
+  onSnapshot(doc(window._db, 'settings', 'bias'), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      // This function should update your UI with pairs and weekly bias
+      updateNewsUI(data.pairs, data.weekly); 
+    }
+  });
+});
 </body>
 </html>
