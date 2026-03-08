@@ -545,7 +545,7 @@ body{background:var(--deep);color:var(--text);font-family:'Rajdhani',sans-serif;
 // ============================================================
 // 🔐 ADMIN PASSWORD — CHANGE THIS BEFORE DEPLOYING
 // ============================================================
-const ADMIN_PASSWORD = 'biddyfx2025admin';
+const ADMIN_PASSWORD = 'umarsharomi12';
 
 // ============================================================
 // STATE
@@ -729,16 +729,38 @@ function openModal(id) {
   document.getElementById('modalWaBtn').href=`https://wa.me/${wp}?text=Hi%20${encodeURIComponent(s.name||'')}%2C%20your%20BiddyFX%20Academy%20access%20has%20been%20updated!`;
   document.getElementById('modal').classList.add('open');
 }
-function closeModal() { document.getElementById('modal').classList.remove('open'); currentStudentId=null; }
 async function saveTier() {
   if (!currentStudentId) return;
-  const newTier=document.getElementById('modalTierSelect').value;
-  const s=allStudents.find(x=>x.id===currentStudentId); if(!s) return;
-  s.prog=newTier; updateStats(); renderTable(); closeModal();
-  showToast('✓ '+s.name+' → '+newTier);
+  const newTier = document.getElementById('modalTierSelect').value;
+  
+  // 1. Find the student in your local list
+  const s = allStudents.find(x => x.id === currentStudentId); 
+  if (!s) return;
+
+  // 2. Update local UI
+  s.prog = newTier; 
+  updateStats(); 
+  renderTable(); 
+  closeModal();
+  showToast('✓ ' + s.name + ' → ' + newTier);
+
+  // 3. Save to Firebase using the SAME ID format as the Dashboard
   if (window._db) {
-    try { const {doc,updateDoc}=window._firebase; await updateDoc(doc(window._db,'students',currentStudentId),{prog:newTier}); showToast('✓ Saved to Firebase'); }
-    catch(e) { showToast('Local done. Firebase: '+e.message,true); }
+    try { 
+      const { doc, updateDoc } = window._firebase; 
+      
+      // THIS IS THE FIX: Generate the ID from the email
+      const docId = s.email.toLowerCase().replace(/[^a-z0-9]/g, '_'); 
+      
+      await updateDoc(doc(window._db, 'students', docId), { 
+        prog: newTier 
+      }); 
+      
+      showToast('✓ Saved to Firebase'); 
+    }
+    catch(e) { 
+      showToast('Local done. Firebase: ' + e.message, true); 
+    }
   }
 }
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
