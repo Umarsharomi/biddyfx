@@ -255,8 +255,8 @@ footer{background:#000;border-top:1px solid var(--border);padding:30px 5vw;}
 
 <!-- Firebase SDK -->
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { initializeApp } from 'https://firebase.google.com/docs/web/setup#available-libraries';
+import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'https://firebase.google.com/docs/web/setup#available-libraries';
 
 // ============================================================
 // 🔥 PASTE YOUR FIREBASE CONFIG HERE (same config in all 3 files)
@@ -269,6 +269,7 @@ const firebaseConfig = {
   messagingSenderId: "659389873986",
   appId: "1:659389873986:web:2a0947feb8c317174052db"
 };
+  
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
